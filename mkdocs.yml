@@ -9,6 +9,17 @@ edit_uri: edit/main/
 
 docs_dir: src
 
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: info
+  links:
+    not_found: warn
+    absolute_links: info
+    unrecognized_links: info
+    anchors: warn
+
 theme:
   name: material
   language: en
