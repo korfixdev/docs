@@ -7,12 +7,7 @@ repo_url: https://github.com/korfixdev/docs
 repo_name: korfixdev/docs
 edit_uri: edit/main/
 
-docs_dir: .
-exclude_docs: |
-  README.md
-  LICENSE
-  .git/
-  .github/
+docs_dir: src
 
 theme:
   name: material
