@@ -216,46 +216,99 @@ curl -s -X POST "$API_URL/api/db/custom_dbfields" \
 
 **Значения `acctype_*`:**
 
-| Значение | Доступ |
-|----------|--------|
-| `0` | Нет доступа (каталог скрыт) |
-| `1` | Полный доступ (видит все записи) |
-| `2` | Только свои (видит только записи, где `from_auth = свой user_id`) |
+| Значение | Доступ | Когда использовать |
+|----------|--------|--------------------|
+| `0` | Нет доступа (каталог скрыт) | Роль не должна видеть этот каталог вообще |
+| `1` | Все записи организации (своего `from_group`) | Совместная работа: задачи, клиенты, сделки — видят все сотрудники |
+| `2` | Только свои (`from_auth = свой user_id`) | Персональные данные: заметки, черновики, настройки |
 
-Список ролей **специфичен для инстанса** — на `panel.korfix.ru` одни роли, на self-hosted может быть другой набор. Получить актуальный список: `App.fetch('/db/access_db/sheme.json')` → смотреть поля `acctype_*` в ответе.
+Список ролей **специфичен для инстанса** — на `panel.korfix.ru` один набор, на self-hosted может быть другой. Получить актуальный список: `App.fetch('/db/access_db/sheme.json')` → смотреть поля с префиксом `acctype_` в ответе.
+
+### Best practice: дефолт «2 всем ролям» (self-access)
+
+**Самый безопасный и типовой дефолт — выдать всем ролям значение `2` (только свои записи).** Этого достаточно для большинства приложений: каждый пользователь видит только то, что создал сам.
+
+Когда выбирать другое:
+- **Значение `1`** (все записи организации) — для коллаборативных каталогов: задачи (все видят все задачи компании), клиенты CRM, сделки, склад
+- **Значение `0`** (нет доступа) — для технических/внутренних каталогов, которые не должен видеть конкретный тип аккаунта
+- **Смешанно** — если роли реально отличаются (админ видит всё, менеджер видит всё своей группы, клиент видит только свои заявки)
+
+### Готовый паттерн: «self всем» (рекомендуемый дефолт)
+
+```js
+async function configureAccess(catalog, defaultValue = 2) {
+    // 1. Получить список полей acctype_* из схемы
+    const schema = await App.fetch('/db/access_db/sheme.json');
+    const acctypeFields = Object.keys(schema.data || {})
+        .filter(k => k.startsWith('acctype_'));
+
+    // 2. Найти auto-created запись для нашего каталога
+    const resp = await App.fetch(
+        `/db/access_db.json?form[dbmodule]=${catalog}`
+    );
+    const access = resp.data?.[0];
+    if (!access) {
+        console.warn(`access_db entry for ${catalog} not found`);
+        return;
+    }
+
+    // 3. Собрать body со всеми acctype_* = defaultValue
+    const body = {
+        'form[id]': access.id,
+        'form[alias]': access.alias,
+        'form[dbmodule]': access.dbmodule,
+        submit: 1,
+    };
+    for (const field of acctypeFields) {
+        body[`form[${field}]`] = defaultValue;
+    }
+
+    // 4. Обновить запись
+    await App.fetch(`/db/access_db/${access.alias}?edit&ajax=1`, {
+        method: 'POST',
+        body
+    });
+}
+
+// Использование в installer:
+await configureAccess('custom_quicknotes');           // все роли → self (2)
+await configureAccess('custom_shared_tasks', 1);      // все роли → all (1)
+```
+
+Функция сама подтянет актуальный список ролей текущего инстанса — не надо хардкодить `acctype_adm`, `acctype_b2b2` и т.д.
 
 ### Что делать миниапу при установке
 
-Два варианта:
+Три варианта по убыванию предпочтения:
 
-**1. Автоматически обновить access_db из миниапа** (если знаешь какие роли должны иметь доступ):
+**1. Автоматически: self всем ролям** (best default — большинство апп-случаев)
 
 ```js
-// Найти запись access_db для своего каталога
-const resp = await App.fetch(
-    '/db/access_db.json?form[dbmodule]=custom_quicknotes'
-);
-const access = resp.data?.[0];
-
-if (access) {
-    // Обновить права для менеджеров (acctype_adm) и операторов (acctype_b2b2)
-    await App.fetch(`/db/access_db/${access.alias}?edit&ajax=1`, {
-        method: 'POST',
-        body: {
-            'form[id]': access.id,
-            'form[alias]': access.alias,
-            'form[dbmodule]': access.dbmodule,
-            'form[acctype_adm]': 1,   // менеджер — все записи
-            'form[acctype_b2b2]': 2,  // оператор — только свои
-            submit: 1
-        }
-    });
-}
+await configureAccess('custom_my_catalog');  // см. функцию выше
 ```
 
-**2. Попросить админа после установки**:
+**2. Автоматически: конкретные значения для конкретных ролей** (если нужна коллаборация)
 
-В `about` раздел «Настройка» явно написать: «После установки откройте `/db/access_db`, найдите запись для `custom_my_catalog`, проставьте нужные права для ролей».
+```js
+await configureAccess('custom_tasks', 1);  // все видят все
+// или точечно:
+await App.fetch(`/db/access_db/${access.alias}?edit&ajax=1`, {
+    method: 'POST',
+    body: {
+        'form[id]': access.id,
+        'form[alias]': access.alias,
+        'form[dbmodule]': access.dbmodule,
+        'form[acctype_adm]': 1,      // менеджер — все
+        'form[acctype_b2b2]': 2,     // оператор — только свои
+        'form[acctype_b2b3]': 0,     // клиент — скрыто
+        submit: 1
+    }
+});
+```
+
+**3. Делегировать админу** (если бизнес-логика прав сложная)
+
+В `about` → «Настройка» написать: «После установки откройте `/db/access_db`, найдите запись для `custom_my_catalog`, проставьте права ролям». Это OK если администратор однозначно понимает что выставлять.
 
 ### Важные нюансы
 
