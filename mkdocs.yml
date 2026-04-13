@@ -1,0 +1,121 @@
+site_name: Korfix Documentation
+site_url: https://docs.korfix.info
+site_description: Public documentation for the Korfix platform — ERP, miniapp marketplace, AI development SDK
+site_author: Korfix
+
+repo_url: https://github.com/korfixdev/docs
+repo_name: korfixdev/docs
+edit_uri: edit/main/
+
+docs_dir: .
+exclude_docs: |
+  README.md
+  LICENSE
+  .git/
+  .github/
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - navigation.instant
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: INDEX.md
+  - Miniapps:
+    - Overview: miniapps/INDEX.md
+    - Getting started:
+      - Rules: miniapps/rules.md
+      - First miniapp: miniapps/getting-started.md
+    - Core API:
+      - Config & entry points: miniapps/config-json.md
+      - JS API (VMCRMUserApp): miniapps/js-api.md
+      - Data API: miniapps/data-api.md
+      - Storage & hooks: miniapps/storage-and-hooks.md
+    - UI & Dashboards:
+      - Styling: miniapps/styling.md
+      - Dashboards: miniapps/dashboards.md
+    - Platform features:
+      - Self-provisioning: miniapps/self-provisioning.md
+      - Catalog rules: miniapps/catalog-rules.md
+      - Catalog settings: miniapps/catalog-settings.md
+      - DB views: miniapps/db-views.md
+    - Catalog reference:
+      - All catalogs: miniapps/korfix-catalogs.md
+      - Favorites menu: miniapps/favorites-menu.md
+      - Push settings: miniapps/systempush-settings.md
+      - Help content: miniapps/account-help.md
+      - Access statuses: miniapps/access-statuses.md
+      - Bitrix24 sync: miniapps/bitrix24-sync.md
+    - Release:
+      - Deploy: miniapps/deploy.md
+      - Checklist: miniapps/checklist.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/korfixdev
+    - icon: fontawesome/solid/globe
+      link: https://korfix.ru
+  generator: false
+
+copyright: Copyright &copy; 2026 Korfix · Licensed CC BY-SA 4.0
