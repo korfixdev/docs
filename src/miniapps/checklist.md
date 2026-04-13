@@ -44,6 +44,12 @@
 - [ ] `/db/` запросы с `form[]`, `/api/db/` — без `form[]`
 - [ ] Стили не зависят от CSS платформы (iframe изолирован)
 - [ ] Self-provisioning проверяет каталог через `custom_dbtables`, а не `/db/{catalog}.json`
+- [ ] **`custom_` префикс везде** при обращении к собственным каталогам и полям:
+    - URL обращений: `App.fetch('/db/custom_my_catalog.json')`, не `/db/my_catalog.json`
+    - Чтение полей записей: `record.custom_my_field`, не `record.my_field`
+    - В `permissions.catalogs`: `"custom_my_catalog": ["read", "write"]`
+    - В `config.json` точках встраивания (`menu`, `catalogs.*`): тоже с `custom_`
+    - **Исключение** — при создании самого каталога в `custom_dbtables.dbname` префикс **не указывается** (платформа добавляет сама), а при создании поля в `custom_dbfields.scheme` — **указывается**
 - [ ] При массовом создании записей — явно генерировать `form[alias]`, передавать `form[from_auth]` и `form[from_group]`
 
 ## После установки
