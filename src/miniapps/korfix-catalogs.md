@@ -1,7 +1,7 @@
 # Маркетплейс -- Каталоги Korfix
 
 > **См. также:** [data-api.md](data-api.md) · [self-provisioning.md](self-provisioning.md) · [db-views.md](db-views.md) · [catalog-settings.md](catalog-settings.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Korfix -- полноценная ERP-платформа. Все каталоги доступны из приложения
 через `App.fetch('/db/{catalog}.json', ...)` с правами текущего пользователя.
@@ -561,4 +561,4 @@ const schema = await App.fetch('/db/ag_cashflows/sheme.json');
 
 *Каталоги: /modules/db/ в panel.korfix.ru*
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

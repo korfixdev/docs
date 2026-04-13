@@ -1,7 +1,7 @@
 # Избранное меню (favorites_menu)
 
 > **См. также:** [data-api.md](data-api.md) · [korfix-catalogs.md](korfix-catalogs.md) · [systempush-settings.md](systempush-settings.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Каталог `favorites_menu` — персональные настройки навигации пользователя:
 избранные пункты бокового меню, стартовая страница, режим отображения.
@@ -181,4 +181,4 @@ const top5 = Object.entries(counts)
 
 *Каталог: `/db/favorites_menu` | Схема: `favorites_menu.sheme.inc.php`*
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

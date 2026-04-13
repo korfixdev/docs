@@ -1,7 +1,7 @@
 # Стилизация миниапов под платформу
 
 > **См. также:** [js-api.md](js-api.md) · [dashboards.md](dashboards.md) · [getting-started.md](getting-started.md) · [checklist.md](checklist.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Оформление, CSS-переменные, структура HTML, подключение JS и Chart.js.
 
@@ -768,4 +768,4 @@ try {
 
 ---
 
-**Дальше:** [dashboards.md](dashboards.md) · **← [INDEX](INDEX.md)**
+**Дальше:** [dashboards.md](dashboards.md) · **← [Home](index.md)**

@@ -1,7 +1,7 @@
 # Настройки каталогов
 
 > **См. также:** [self-provisioning.md](self-provisioning.md) · [data-api.md](data-api.md) · [korfix-catalogs.md](korfix-catalogs.md) · [storage-and-hooks.md](storage-and-hooks.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Пользователь может настраивать отображение каталога через модалку (шестерёнка в хедере списка).
 Приложение может читать и сохранять эти настройки, чтобы отображать данные
@@ -277,4 +277,4 @@ App.reload();
 
 ---
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

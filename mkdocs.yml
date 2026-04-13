@@ -86,9 +86,9 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 nav:
-  - Home: INDEX.md
+  - Home: index.md
   - Miniapps:
-    - Overview: miniapps/INDEX.md
+    - Overview: miniapps/index.md
     - Getting started:
       - Rules: miniapps/rules.md
       - First miniapp: miniapps/getting-started.md

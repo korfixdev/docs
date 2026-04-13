@@ -1,7 +1,7 @@
 # Чеклист перед релизом
 
 > **См. также:** [deploy.md](deploy.md) · [rules.md](rules.md) · [styling.md](styling.md) · [self-provisioning.md](self-provisioning.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Проверьте все пункты перед публикацией приложения в маркетплейс.
 
@@ -49,4 +49,4 @@
 
 ---
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

@@ -1,7 +1,7 @@
 # Правила каталогов (catalog_rules)
 
 > **См. также:** [storage-and-hooks.md](storage-and-hooks.md) · [self-provisioning.md](self-provisioning.md) · [data-api.md](data-api.md) · [korfix-catalogs.md](korfix-catalogs.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Декларативные правила afterSave/beforeSave — автоматизация без PHP-кода.
 
@@ -434,4 +434,4 @@ await App.fetch(`/db/catalog_rules/${alias}?edit&ajax=1`, {
 
 *Каталог: `/db/catalog_rules` | Класс: `lib/local/CatalogRules.php`*
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

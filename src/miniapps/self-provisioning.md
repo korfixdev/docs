@@ -1,7 +1,7 @@
 # Self-provisioning: создание структур данных
 
 > **См. также:** [data-api.md](data-api.md) · [catalog-rules.md](catalog-rules.md) · [catalog-settings.md](catalog-settings.md) · [korfix-catalogs.md](korfix-catalogs.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Приложение может создавать себе каталоги (таблицы) и кастомные поля при установке или первом запуске.
 
@@ -194,4 +194,4 @@ curl -s -X POST "$API_URL/api/db/custom_dbfields" \
 
 ---
 
-**Дальше:** [styling.md](styling.md) · **← [INDEX](INDEX.md)**
+**Дальше:** [styling.md](styling.md) · **← [Home](index.md)**

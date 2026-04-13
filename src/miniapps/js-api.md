@@ -1,7 +1,7 @@
 # JS API — VMCRMUserApp
 
 > **См. также:** [config-json.md](config-json.md) · [data-api.md](data-api.md) · [storage-and-hooks.md](storage-and-hooks.md) · [styling.md](styling.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Клиентский JS-класс для взаимодействия миниапа с CRM-платформой через `postMessage`.
 
@@ -199,4 +199,4 @@ App.off('page.navigated'); // удалить все обработчики
 
 ---
 
-**Дальше:** [data-api.md](data-api.md) · **← [INDEX](INDEX.md)**
+**Дальше:** [data-api.md](data-api.md) · **← [Home](index.md)**

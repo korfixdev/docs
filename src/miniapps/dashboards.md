@@ -1,7 +1,7 @@
 # Дашборды и виджеты
 
 > **См. также:** [config-json.md](config-json.md) · [styling.md](styling.md) · [data-api.md](data-api.md) · [self-provisioning.md](self-provisioning.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Дашборды — настраиваемые рабочие столы с виджетами. Приложение маркетплейса может
 встраивать свои фреймы как виджеты дашборда, а также создавать стандартные виджеты
@@ -329,4 +329,4 @@ const colors = [
 
 ---
 
-**Дальше:** [deploy.md](deploy.md) · **← [INDEX](INDEX.md)**
+**Дальше:** [deploy.md](deploy.md) · **← [Home](index.md)**

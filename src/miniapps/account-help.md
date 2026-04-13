@@ -1,7 +1,7 @@
 # Инструкции и справка (account_help, service_help)
 
 > **См. также:** [data-api.md](data-api.md) · [korfix-catalogs.md](korfix-catalogs.md) · [favorites-menu.md](favorites-menu.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Два каталога для контекстной помощи: инструкции к каталогам
 и справочная информация на страницах.
@@ -192,4 +192,4 @@ all.data.forEach(item => {
 
 *Каталоги: `/db/account_help`, `/db/service_help`*
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

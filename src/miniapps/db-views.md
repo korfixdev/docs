@@ -1,7 +1,7 @@
 # Представления (custom_dbview)
 
 > **См. также:** [data-api.md](data-api.md) · [korfix-catalogs.md](korfix-catalogs.md) · [self-provisioning.md](self-provisioning.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Объединение двух каталогов в одно представление через MySQL VIEW + LEFT JOIN.
 Результат работает как обычный каталог — с фильтрацией, API, виджетами.
@@ -249,4 +249,4 @@ const data = asArray(await App.fetchAll('/db/custom_cashflows_clients_view.json'
 
 ---
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

@@ -1,7 +1,7 @@
 # Синхронизация с Bitrix24 (bitrix24_sync)
 
 > **См. также:** [data-api.md](data-api.md) · [storage-and-hooks.md](storage-and-hooks.md) · [korfix-catalogs.md](korfix-catalogs.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Платформа поддерживает двустороннюю синхронизацию каталогов с Bitrix24 CRM.
 Миниапы могут читать и управлять настройками синхронизации.
@@ -202,4 +202,4 @@ logs.data.forEach(log => {
 
 *Каталоги: `/db/bitrix24_sync`, `/db/bitrix24_sync_fieldmap` | Бэкенд: [../backend/bitrix24-integration.md](../backend/bitrix24-integration.md)*
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

@@ -1,7 +1,7 @@
 # Работа с данными каталогов
 
 > **См. также:** [js-api.md](js-api.md) · [storage-and-hooks.md](storage-and-hooks.md) · [self-provisioning.md](self-provisioning.md) · [korfix-catalogs.md](korfix-catalogs.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 CRUD-операции над каталогами, форматы запросов, фильтрация и пагинация.
 
@@ -464,4 +464,4 @@ TT (задачи), WH (склад), VRN (выездные работы), CRM, с
 
 ---
 
-**Дальше:** [storage-and-hooks.md](storage-and-hooks.md) · **← [INDEX](INDEX.md)**
+**Дальше:** [storage-and-hooks.md](storage-and-hooks.md) · **← [Home](index.md)**

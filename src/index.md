@@ -4,7 +4,7 @@ Public documentation for the Korfix platform — ERP, miniapp marketplace, AI de
 
 ## Sections
 
-- 📘 [miniapps/](miniapps/INDEX.md) — marketplace miniapp development (HTML+JS+CSS in iframe, platform API)
+- 📘 [miniapps/](miniapps/index.md) — marketplace miniapp development (HTML+JS+CSS in iframe, platform API)
 
 Planned: `catalogs/` (business catalog reference), `workflows/` (automation recipes), `backend/` (public framework architecture).
 
@@ -48,7 +48,7 @@ info@korfix.ru
 
 ## Разделы
 
-- 📘 [miniapps/](miniapps/INDEX.md) — разработка маркетплейс-миниапов (HTML+JS+CSS в iframe, работа с API)
+- 📘 [miniapps/](miniapps/index.md) — разработка маркетплейс-миниапов (HTML+JS+CSS в iframe, работа с API)
 
 В будущем: `catalogs/` (справочник бизнес-каталогов), `workflows/` (рецепты автоматизации), `backend/` (архитектура ядра).
 

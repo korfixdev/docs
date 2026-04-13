@@ -1,7 +1,7 @@
 # Права на статусы (access_statuses)
 
 > **См. также:** [data-api.md](data-api.md) · [korfix-catalogs.md](korfix-catalogs.md) · [catalog-rules.md](catalog-rules.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Каталог `access_statuses` управляет тем, какие статусы доступны
 для каждой роли пользователя в каждом каталоге.
@@ -149,4 +149,4 @@ if (params.data.userId !== params.data.groupId) {
 
 *Каталог: `/db/access_statuses` | Бэкенд: [../backend/statuses.md](../backend/statuses.md)*
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

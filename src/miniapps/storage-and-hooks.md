@@ -1,7 +1,7 @@
 # Storage API — KV-хранилище
 
 > **См. также:** [data-api.md](data-api.md) · [catalog-rules.md](catalog-rules.md) · [js-api.md](js-api.md) · [self-provisioning.md](self-provisioning.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Изолированное хранилище ключ-значение для каждого установленного приложения, а также вебхуки и afterSave.
 
@@ -240,4 +240,4 @@ await App.storage.set(
 
 ---
 
-**Дальше:** [self-provisioning.md](self-provisioning.md) · **← [INDEX](INDEX.md)**
+**Дальше:** [self-provisioning.md](self-provisioning.md) · **← [Home](index.md)**

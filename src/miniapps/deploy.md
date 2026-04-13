@@ -1,7 +1,7 @@
 # Деплой приложения
 
 > **См. также:** [rules.md](rules.md) · [getting-started.md](getting-started.md) · [checklist.md](checklist.md) · [config-json.md](config-json.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Пошаговое создание, упаковка, загрузка через API и обновление миниапов.
 
@@ -184,4 +184,4 @@ echo "$RESPONSE"
 
 ---
 
-**Дальше:** [checklist.md](checklist.md) · **← [INDEX](INDEX.md)**
+**Дальше:** [checklist.md](checklist.md) · **← [Home](index.md)**

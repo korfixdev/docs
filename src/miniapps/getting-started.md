@@ -1,7 +1,7 @@
 # Первое приложение за 15 минут
 
 > **См. также:** [rules.md](rules.md) · [config-json.md](config-json.md) · [js-api.md](js-api.md) · [deploy.md](deploy.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 End-to-end: от пустой папки до работающего виджета в CRM.
 Перед началом обязательно прочитай [rules.md](rules.md).
@@ -128,4 +128,4 @@ curl -X POST "https://panel-korfix.vnn.ru/api/db/marketplace/{ID}?token={TOKEN}"
 
 ---
 
-**Дальше:** [config-json.md](config-json.md) · **← [INDEX](INDEX.md)**
+**Дальше:** [config-json.md](config-json.md) · **← [Home](index.md)**

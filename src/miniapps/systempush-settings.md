@@ -1,7 +1,7 @@
 # Настройки push-уведомлений (systempush_settings)
 
 > **См. также:** [data-api.md](data-api.md) · [korfix-catalogs.md](korfix-catalogs.md) · [account-help.md](account-help.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Каталог `systempush_settings` — персональные подписки пользователя
 на push-уведомления из каталогов платформы.
@@ -182,4 +182,4 @@ async function isSubscribed(catalog) {
 
 *Каталог: `/db/systempush_settings` | Схема: `systempush_settings.sheme.inc.php`*
 
-**← [INDEX](INDEX.md)**
+**← [Home](index.md)**

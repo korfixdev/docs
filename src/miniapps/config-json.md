@@ -1,7 +1,7 @@
 # Точки встраивания и config.json
 
 > **См. также:** [getting-started.md](getting-started.md) · [js-api.md](js-api.md) · [dashboards.md](dashboards.md) · [deploy.md](deploy.md)
-> **← [INDEX](INDEX.md)**
+> **← [Home](index.md)**
 
 Описание всех точек встраивания фреймов в CRM-платформу и настройка дашборд-виджетов.
 
@@ -90,4 +90,4 @@ App.getRequestParams().then(({data}) => {
 
 ---
 
-**Дальше:** [js-api.md](js-api.md) · **← [INDEX](INDEX.md)**
+**Дальше:** [js-api.md](js-api.md) · **← [Home](index.md)**
