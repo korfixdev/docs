@@ -37,6 +37,10 @@ const resp = await App.fetch('/api/db/projects?token=YOUR_TOKEN');
 
 // getcatalogs — список доступных каталогов
 const catalogs = await App.fetch('/api/db/getcatalogs?token=YOUR_TOKEN');
+
+// /api/user/tariff — тариф и биллинговая инфа текущего пользователя
+const billing = await App.fetch('/api/user/tariff');
+// data: { tarif, tarif_name, balance, discount, discount_date, payment_date, price, ... }
 ```
 
 **Настройка**: `/db/api` -> создать токен -> указать разрешённые классы API.
