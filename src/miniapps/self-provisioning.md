@@ -106,8 +106,16 @@ async function runInstall() {
     for (const field of FIELDS) {
         await createField(field);
     }
+
+    // ОБЯЗАТЕЛЬНО: настроить права в access_db, иначе каталог невидим обычным ролям.
+    // Default = 2 (self — каждый видит только свои записи) — типовой best-default.
+    // Для коллаборативных каталогов (общие задачи, клиенты) — передать 1.
+    // Функция configureAccess определена в разделе "Права доступа (access_db)" ниже.
+    await configureAccess(CATALOG);  // CATALOG = 'custom_quicknotes'
 }
 ```
+
+> Без `configureAccess` после `createTable` каталог будет виден только админам — обычные роли получат пустой `data: []` (см. раздел «Права доступа (access_db)» ниже).
 
 #### Полный паттерн: HTML с экраном установки
 
