@@ -107,6 +107,26 @@ requestAnimationFrame(() => App.setFrameSize(null, document.body.scrollHeight));
 - `App.fetch()` использует сессию пользователя, токен не нужен — [data-api.md](data-api.md)
 - `App.setFrameSize()` подгоняет высоту iframe — подробнее про авторесайз и стили в [styling.md](styling.md)
 
+### ⚠️ `/db/` vs `/api/db/` — не перепутай
+
+Код внутри миниапа (в iframe) использует **`/db/{catalog}.json`** через `App.fetch`. Это работает по **сессии** пользователя (cookie), токен не нужен.
+
+Если хочешь тестировать тот же запрос снаружи (через curl, скрипт, Postman) — нужно использовать **`/api/db/{catalog}`** с Bearer-токеном, не `/db/`:
+
+```bash
+# Внутри iframe — через App.fetch:
+await App.fetch('/db/tt_tasks.json')                       # ← работает
+
+# Снаружи (curl, тесты, автоматизация):
+curl "https://panel.korfix.ru/api/db/tt_tasks?limit=10" \
+  -H "Authorization: Bearer YOUR_TOKEN"                    # ← работает
+
+# НЕ ДЕЛАЙ так снаружи — получишь 302 на логин:
+curl https://panel.korfix.ru/db/tt_tasks.json              # ✗ 302
+```
+
+Подробнее: [data-api.md](data-api.md) — раздел «Ключевое правило: какой endpoint откуда».
+
 ## Шаг 4. Упаковать и задеплоить
 
 ```bash
