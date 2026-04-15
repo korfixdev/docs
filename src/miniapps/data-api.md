@@ -121,6 +121,67 @@ curl -X POST "https://panel.korfix.ru/api/db/projects" \
   -F "name=Проект" -F "submit=1"
 ```
 
+### ⚠️ Всегда проверяй `status` write-операций
+
+`App.fetch()` **не бросает исключение** при логической ошибке — он возвращает объект с `{status: 'error'}` или `{status: 'no'}` + HTTP 200. Если ты его не проверяешь, ошибка молча проглатывается, и приложение ведёт себя как будто всё хорошо (пока не упадёт где-то дальше в неочевидном месте).
+
+**Типовая ошибка:**
+
+```js
+// ❌ Нет проверки — ошибка съедается
+await App.fetch('/db/custom_dbtables/add?edit&ajax=1', {
+    method: 'POST',
+    body: { 'form[dbname]': 'my_catalog', submit: 1 }
+});
+// Запись не создалась (например, scheme не передан), но код едет дальше
+```
+
+**Правильно:**
+
+```js
+const resp = await App.fetch('/db/custom_dbtables/add?edit&ajax=1', {
+    method: 'POST',
+    body: {
+        'form[dbname]': 'my_catalog',
+        'form[scheme]': 'coredb_def_catalog',
+        submit: 1
+    }
+});
+if (!resp || resp.status === 'error' || resp.status === 'no') {
+    throw new Error(resp?.message || JSON.stringify(resp));
+}
+```
+
+**Что обозначают status-значения:**
+
+| Значение | Смысл |
+|---|---|
+| `'ok'` / `'success'` | Операция прошла. Есть data. |
+| `'error'` | Явная ошибка (валидация не прошла, поле обязательное и пустое, доступ запрещён). В `message` или `errors` — текст. |
+| `'no'` | Операция не выполнена по содержательной причине (например, запись не найдена при edit). |
+| отсутствует/`null` | Сетевая/серверная ошибка. Относись как к error. |
+
+**Паттерн-хелпер**, чтобы не копировать проверку везде:
+
+```js
+async function appFetch(url, options) {
+    const resp = await App.fetch(url, options);
+    if (!resp || resp.status === 'error' || resp.status === 'no') {
+        throw new Error(`${url}: ${resp?.message || JSON.stringify(resp)}`);
+    }
+    return resp;
+}
+
+// Использование — в коде больше не надо писать проверки:
+const resp = await appFetch('/db/custom_dbtables/add?edit&ajax=1', {
+    method: 'POST',
+    body: { ... }
+});
+// если дошли сюда — всё ок, resp.data содержит результат
+```
+
+Для чтения (`GET /db/.json`) проверка тоже полезна, но там в ошибке обычно HTTP-статус ≠ 200 — `App.fetch` может вернуть сам HTTP response.
+
 ---
 
 ## Работа с данными каталогов

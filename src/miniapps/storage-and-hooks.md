@@ -27,6 +27,26 @@ const all = await App.storage.get('');
 await App.storage.unset('my.setting');
 ```
 
+> ⚠️ **`get()` возвращает RECORD (объект), а не значение.** Типовая ошибка:
+>
+> ```js
+> // ❌ НЕПРАВИЛЬНО — typecast в строку даёт "[object Object]"
+> const val = await App.storage.get('my.setting');
+> console.log(val);                     // [object Object]
+> element.textContent = val;            // "[object Object]" в UI
+>
+> // ✅ ПРАВИЛЬНО — брать поле .value
+> const rec = await App.storage.get('my.setting');
+> const val = rec?.value ?? '';
+> console.log(val);                     // 'hello'
+> ```
+>
+> Если нужно читать как объект (сохраняли через `JSON.stringify`):
+> ```js
+> const rec = await App.storage.get('my.config');
+> const cfg = rec?.value ? JSON.parse(rec.value) : {};
+> ```
+
 > **Важно: `value` — всегда строка.** `App.storage.set(key, value)` передаёт value как
 > строку через POST. Если передать объект или массив — сохранится `[object Object]`.
 > Для хранения сложных структур используйте `JSON.stringify()` / `JSON.parse()`:
