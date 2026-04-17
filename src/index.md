@@ -14,12 +14,29 @@ Planned: `catalogs/` (business catalog reference), `workflows/` (automation reci
 
 **AI agents** — via Claude Code plugins:
 
+**Step 1 — Add Korfix marketplace** (once):
 ```
-/plugin add github:korfixdev/devkit       # for miniapp development
-/plugin add github:korfixdev/assistant    # for business data queries
+korfixdev/marketplace
+```
+In Claude Code: `/plugin` → **Add marketplace** → paste the line above.
+
+**Step 2 — Install the plugin you need:**
+
+For miniapp development:
+```
+/plugin install korfix-devkit@korfixdev
+```
+For business data queries:
+```
+/plugin install korfix-assistant@korfixdev
 ```
 
-Each plugin ships with agents, skills, and preconfigured MCP.
+**Step 3 — Activate:**
+```
+/reload-plugins
+```
+
+Each plugin ships with agents, skills, and documentation.
 
 ## Related
 
@@ -58,9 +75,26 @@ info@korfix.ru
 
 **AI-агентам** — через Claude Code plugins:
 
+**Шаг 1 — Добавь маркетплейс Korfix** (один раз):
 ```
-/plugin add github:korfixdev/devkit       # для разработки миниапов
-/plugin add github:korfixdev/assistant    # для бизнес-запросов к данным
+korfixdev/marketplace
+```
+В Claude Code: `/plugin` → **Add marketplace** → вставь строку выше.
+
+**Шаг 2 — Установи нужный плагин:**
+
+Для разработки миниапов:
+```
+/plugin install korfix-devkit@korfixdev
+```
+Для бизнес-запросов к данным:
+```
+/plugin install korfix-assistant@korfixdev
+```
+
+**Шаг 3 — Активируй:**
+```
+/reload-plugins
 ```
 
 ## Связанные ресурсы
