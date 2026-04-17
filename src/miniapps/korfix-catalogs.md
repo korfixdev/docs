@@ -182,8 +182,8 @@ Korfix -- полноценная ERP-платформа. Все каталоги
 | `dashboards` | Рабочие столы |
 | `saved_filters` | Сохранённые фильтры |
 | `apps_storage` | KV-хранилище приложений |
-| `installed_apps` | Установленные приложения |
-| `marketplace` | Маркетплейс |
+| `installed_apps` | Установленные приложения (у конкретной группы/тенанта) |
+| `marketplace` | Каталог всех приложений маркетплейса |
 | `todo` | ToDo |
 | `remarks` | Замечания |
 | `bookmarks` | Закладки |
@@ -194,6 +194,75 @@ Korfix -- полноценная ERP-платформа. Все каталоги
 | `trash` | Корзина |
 | `docs` | Документы (doctxt) |
 | `catalog_rules` | Правила каталогов (afterSave/beforeSave) |
+
+---
+
+## Каталоги маркетплейса — подробно
+
+### `marketplace` — глобальный реестр приложений
+
+Содержит **все** приложения, опубликованные в маркетплейсе, независимо от того, установлены они у пользователя или нет. Это публичный каталог — аналог App Store.
+
+Ключевые поля ответа:
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `alias` | string | Уникальный идентификатор приложения |
+| `name` | string | Название приложения |
+| `anons` | string | Краткое описание (из `config.json → description`) |
+| `about` | string | Подробное описание (из `config.json → about`) |
+| `tags` | string | Теги через запятую |
+| `doc` | string | Имя файла иконки — путь: `/data/db/f_marketplace/{doc}` |
+| `from_group` | string | ID группы-владельца (разработчика) приложения |
+| `package` | string | Имя пакета (из `config.json → package`) |
+| `version` | string | Версия приложения |
+
+```js
+// Список всех приложений маркетплейса
+const resp = await App.fetch('/db/marketplace.json');
+// resp.data[0].doc → имя файла иконки
+// Путь к иконке: `/data/db/f_marketplace/${item.doc}`
+```
+
+### `installed_apps` — установленные приложения тенанта
+
+Содержит приложения, **установленные конкретной группой** (тенантом). Это не глобальный список — каждая группа видит только свои установленные приложения. Заполняется автоматически платформой при установке через UI маркетплейса.
+
+**Важно**: `installed_apps` — это единственный источник истины для вопроса «установлено ли приложение у данного пользователя». Не путать с `marketplace` (там все приложения) и `dashboard_widgets` (там виджеты дашборда, даже если тип — приложение маркетплейса).
+
+Ключевые поля:
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `alias` | string | Уникальный alias записи |
+| `app_id` | string | **Alias записи в `marketplace`** — главная связь |
+| `name` | string | Название (копируется из marketplace) |
+| `from_group` | string | ID группы, которая установила приложение |
+
+```js
+// Проверить, установлено ли приложение с package="my-app"
+const installed = await App.fetchAll('/db/installed_apps.json');
+const myApp = installed.data.find(a => a.app_id === 'MY_MARKETPLACE_ALIAS');
+const isInstalled = !!myApp;
+
+// Если нужен alias из marketplace — он в поле app_id
+const marketplaceAlias = myApp?.app_id;
+```
+
+### Жизненный цикл приложения
+
+```
+marketplace          → installed_apps         → dashboard_widgets
+(глобальный реестр)   (установлено у тенанта)   (размещено на дашборде)
+     ↑                       ↑                          ↑
+ деплой через API      пользователь нажал        пользователь добавил
+ /db/marketplace/{id}  «Установить» в UI         виджет на рабочий стол
+```
+
+Связи:
+- `installed_apps.app_id` → `marketplace.alias` (FK: что установлено)
+- `dashboard_widgets.options.package` → `config.json → package` (что отображается на дашборде)
+- `apps_storage.app_id` → `installed_apps.id` (KV-хранилище конкретной установки)
 
 ### Рассылки и коммуникации
 
