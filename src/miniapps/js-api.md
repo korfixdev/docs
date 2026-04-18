@@ -25,7 +25,7 @@ const App = new VMCRMUserApp();
 | Метод | Возвращает | Описание |
 |-------|-----------|----------|
 | `App.getRequestParams()` | Promise -> `{data: {app_id, domain, catalog, itemId, items, user}}` | Параметры текущего фрейма |
-| `App.getUser()` | Promise -> `{data: {name, group, role, avatar, alias, id, from_auth, from_group, tarif, tarif_name}}` | Информация о текущем пользователе, включая тариф |
+| `App.getUser()` | Promise -> `{data: {name, from_auth, from_group, alias, role, avatar, tarif, tarif_name}}` | Информация о текущем пользователе, включая тариф |
 | `App.getLocation()` | Promise -> `{data: '/db/projects'}` | URL родительского окна |
 | `App.fetch(url, options?)` | Promise -> response | HTTP-запрос от имени пользователя (через родительское окно, минуя CORS) |
 | `App.fetchAll(url, options?)` | Promise -> response | fetch + автосклейка всех страниц пагинации |
@@ -130,17 +130,15 @@ App.getRequestParams().then(resp => {
 
 ```js
 App.getUser().then(resp => {
-  const { name, group, role, avatar, alias, id, from_auth, from_group, tarif, tarif_name } = resp.data;
+  const { name, from_auth, from_group, alias, role, avatar, tarif, tarif_name } = resp.data;
   // name        — ФИО (author_comment)
-  // group       — ID группы (from_group) — числовой ID тенанта
-  // role        — тип аккаунта (account_type, числовой)
-  // avatar      — имя файла аватара (doc)
-  // alias       — alias пользователя
-  // id          — хеш логина (md5), то же что author_id в БД
-  // from_auth   — author_id пользователя (md5 логина) — именно это поле передавать в form[from_auth] при создании записей
-  // from_group  — ID группы (тенанта) — именно это передавать в form[from_group] при создании записей
-  // tarif       — ID тарифа пользователя (строка с числом, напр. "3")
-  // tarif_name  — название тарифа (напр. "Стандарт")
+  // from_auth   — ID пользователя → передавать в form[from_auth] при создании записей
+  // from_group  — ID тенанта → передавать в form[from_group] при создании записей
+  // alias       — md5(login), идентификатор пользователя в системе приложений
+  // role        — тип аккаунта (account_type, числовой: 0=admin, 1=manager, ...)
+  // avatar      — имя файла аватара (doc) → /reimg/data/auth/{avatar}?80x80
+  // tarif       — ID тарифа (строка с числом, напр. "7")
+  // tarif_name  — название тарифа (напр. "Премиум")
 });
 ```
 

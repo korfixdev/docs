@@ -117,12 +117,48 @@ zip -r /tmp/my-app.zip config.json widget.html *.js *.css *.svg
 
 #### Через API (рекомендуется для вайбкодинга)
 
+**Создание нового приложения** (ID ещё не известен):
+
 ```bash
-curl -X POST "https://panel.korfix.ru/api/db/marketplace/{ID}?token={TOKEN}" \
+curl -s -X POST "https://panel.korfix.ru/api/db/marketplace/add" \
+  -H "Authorization: Bearer {TOKEN}" \
+  -F "name=My App Name" \
+  -F "doc1=@/tmp/my-app.zip;type=application/zip"
+# Ответ: {"status":"success","id":"123","alias":"abc..."}
+# Сохрани ID — он понадобится для последующих обновлений
+```
+
+Поля передаются **без обёртки `form[]`** — просто `name=...`. Имя, описание, теги также подтянутся из `config.json` внутри архива при следующем рендере.
+
+**Обновление существующего приложения** (ID известен):
+
+```bash
+curl -s -X POST "https://panel.korfix.ru/api/marketplace/deploy/{ID}" \
+  -H "Authorization: Bearer {TOKEN}" \
   -F "doc1=@/tmp/my-app.zip;type=application/zip"
 ```
 
-Достаточно **только `doc1`** — zip-файл. Имя, описание, теги подтягиваются из `config.json` внутри архива. Лишние поля (`form[name]`, `form[id]` и т.д.) не нужны.
+`/api/marketplace/deploy/{ID}` — предпочтительный эндпоинт: загружает zip и автоматически инвалидирует кеш конфига. Альтернатива через старый эндпоинт:
+
+```bash
+# Старый способ (работает, но требует отдельного refresh):
+curl -s -X POST "https://panel.korfix.ru/api/db/marketplace/{ID}" \
+  -H "Authorization: Bearer {TOKEN}" \
+  -F "doc1=@/tmp/my-app.zip;type=application/zip"
+
+# После него — инвалидировать кеш:
+curl -s -X POST "https://panel.korfix.ru/api/marketplace/refresh/{ID}" \
+  -H "Authorization: Bearer {TOKEN}"
+```
+
+**Только инвалидировать кеш** (если zip уже загружен):
+
+```bash
+curl -s -X POST "https://panel.korfix.ru/api/marketplace/refresh/{ID}" \
+  -H "Authorization: Bearer {TOKEN}"
+```
+
+> `token=` в query string тоже работает как альтернатива Bearer-заголовку.
 
 ### Шаг 8: Установить приложение
 
@@ -141,16 +177,25 @@ curl -X POST "https://panel.korfix.ru/api/db/marketplace/{ID}?token={TOKEN}" \
 
 Загрузку zip можно автоматизировать через REST API, не заходя в интерфейс.
 
-### Деплой новой версии одной командой
+### Полный цикл: создать + задеплоить одной командой
 
 ```bash
 zip -r /tmp/my-app.zip config.json widget.html *.js *.css
 
-curl -X POST "https://panel.korfix.ru/api/db/marketplace/{ID}?token={TOKEN}" \
+# Первый раз — создаём, получаем ID:
+curl -s -X POST "https://panel.korfix.ru/api/db/marketplace/add" \
+  -H "Authorization: Bearer {TOKEN}" \
+  -F "name=My App" \
+  -F "doc1=@/tmp/my-app.zip;type=application/zip"
+# → {"status":"success","id":"123","alias":"abc..."}
+
+# Последующие обновления по ID:
+curl -s -X POST "https://panel.korfix.ru/api/marketplace/deploy/123" \
+  -H "Authorization: Bearer {TOKEN}" \
   -F "doc1=@/tmp/my-app.zip;type=application/zip"
 ```
 
-### Получение ID и alias приложения
+### Получение ID существующего приложения
 
 ```bash
 curl -H "Authorization: Bearer {TOKEN}" \
@@ -177,7 +222,8 @@ APP_ID="50"
 cd "$APP_DIR"
 zip -r /tmp/app-deploy.zip config.json *.html *.js *.css 2>/dev/null
 
-RESPONSE=$(curl -s -X POST "$API_URL/api/db/marketplace/$APP_ID?token=$TOKEN" \
+RESPONSE=$(curl -s -X POST "$API_URL/api/marketplace/deploy/$APP_ID" \
+  -H "Authorization: Bearer $TOKEN" \
   -F "doc1=@/tmp/app-deploy.zip;type=application/zip")
 
 echo "$RESPONSE"
