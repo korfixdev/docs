@@ -133,23 +133,24 @@ curl -s -X POST "https://panel.korfix.ru/api/db/marketplace/add" \
 **Обновление существующего приложения** (ID известен):
 
 ```bash
+curl -s -X POST "https://panel.korfix.ru/api/db/marketplace/{ID}" \
+  -H "Authorization: Bearer {TOKEN}" \
+  -F "doc1=@/tmp/my-app.zip;type=application/zip"
+```
+
+Стандартный эндпоинт загружает zip и уведомляет store через внутренний хук. В production-конфигурации этого достаточно.
+
+**Укороченный вариант через `deploy`** (update + refresh за один запрос):
+
+```bash
+# /api/marketplace/deploy/{ID} — это просто update + refresh в одном вызове.
+# Удобно если нужно явно сбросить appconfig (например в локальной конфигурации).
 curl -s -X POST "https://panel.korfix.ru/api/marketplace/deploy/{ID}" \
   -H "Authorization: Bearer {TOKEN}" \
   -F "doc1=@/tmp/my-app.zip;type=application/zip"
 ```
 
-`/api/marketplace/deploy/{ID}` — предпочтительный эндпоинт: загружает zip и автоматически инвалидирует кеш конфига. Альтернатива через старый эндпоинт:
-
-```bash
-# Старый способ (работает, но требует отдельного refresh):
-curl -s -X POST "https://panel.korfix.ru/api/db/marketplace/{ID}" \
-  -H "Authorization: Bearer {TOKEN}" \
-  -F "doc1=@/tmp/my-app.zip;type=application/zip"
-
-# После него — инвалидировать кеш:
-curl -s -X POST "https://panel.korfix.ru/api/marketplace/refresh/{ID}" \
-  -H "Authorization: Bearer {TOKEN}"
-```
+> Ограничение: `deploy` требует существующий ID. Для создания нового приложения — только стандартный `POST /api/db/marketplace/add`.
 
 **Только инвалидировать кеш** (если zip уже загружен):
 
@@ -190,7 +191,7 @@ curl -s -X POST "https://panel.korfix.ru/api/db/marketplace/add" \
 # → {"status":"success","id":"123","alias":"abc..."}
 
 # Последующие обновления по ID:
-curl -s -X POST "https://panel.korfix.ru/api/marketplace/deploy/123" \
+curl -s -X POST "https://panel.korfix.ru/api/db/marketplace/123" \
   -H "Authorization: Bearer {TOKEN}" \
   -F "doc1=@/tmp/my-app.zip;type=application/zip"
 ```
@@ -222,7 +223,7 @@ APP_ID="50"
 cd "$APP_DIR"
 zip -r /tmp/app-deploy.zip config.json *.html *.js *.css 2>/dev/null
 
-RESPONSE=$(curl -s -X POST "$API_URL/api/marketplace/deploy/$APP_ID" \
+RESPONSE=$(curl -s -X POST "$API_URL/api/db/marketplace/$APP_ID" \
   -H "Authorization: Bearer $TOKEN" \
   -F "doc1=@/tmp/app-deploy.zip;type=application/zip")
 
