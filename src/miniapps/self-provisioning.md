@@ -586,4 +586,54 @@ await App.fetch(`/db/access_db/${access.alias}?edit&ajax=1`, {
 
 ---
 
+## MCP-доступ к кастомным каталогам после установки
+
+Когда MCP-агент работает через Bearer-токен — он видит только каталоги из поля `custom_catalogs` токена. Каталоги, созданные через self-provisioning, **не попадают туда автоматически**.
+
+### Способ 1 — Вручную (admin UI)
+
+После установки: `/db/api` → найти токен → поле **«Доступ к кастомным каталогам»** → выбрать каталог → сохранить.
+
+### Способ 2 — Автоматически из install-фрейма
+
+Требует: токен имеет `db_api_get` + `db_api_post` в `apiclasses_id`.
+
+```js
+async function registerCatalogForMCP(catalogAlias, tokenAlias) {
+    if (!tokenAlias) return
+    const apiResp = await App.fetch(`/db/api.json?form[alias]=${encodeURIComponent(tokenAlias)}`)
+    const apiRecord = apiResp?.data?.[0]
+    if (!apiRecord) return
+
+    const existing = (apiRecord.custom_catalogs || '').split(',').map(s => s.trim()).filter(Boolean)
+    const toAdd = [`db_${catalogAlias}_get`, `db_${catalogAlias}_post`].filter(a => !existing.includes(a))
+    if (!toAdd.length) return
+
+    const resp = await App.fetch(`/db/api/${apiRecord.alias}?edit&ajax=1`, {
+        method: 'POST',
+        body: {
+            'form[id]': apiRecord.id,
+            'form[alias]': apiRecord.alias,
+            'form[custom_catalogs]': [...existing, ...toAdd].join(','),
+            submit: 1
+        }
+    })
+    if (!resp || resp.status === 'error' || resp.status === 'no') {
+        throw new Error(`registerCatalogForMCP failed: ${resp?.message || JSON.stringify(resp)}`)
+    }
+}
+
+// В runInstall() — опциональный шаг, оборачиваем в try/catch:
+try {
+    await registerCatalogForMCP('custom_quicknotes', tokenAlias)
+    logLine('✓ Каталог зарегистрирован для MCP')
+} catch (e) {
+    logLine(`⚠ MCP-регистрация пропущена: ${e.message} — добавьте вручную в /db/api`)
+}
+```
+
+`tokenAlias` — alias токена, который нужно обновить. Не хардкодить в коде: спросить пользователя в форме установки или передать через параметры фрейма.
+
+---
+
 **Дальше:** [styling.md](styling.md) · **← [Home](index.md)**
