@@ -46,9 +46,7 @@ async function checkCatalogExists() {
     try {
         // dbname = имя таблицы без префикса custom_ (quicknotes, не custom_quicknotes)
         const resp = await App.fetch('/db/custom_dbtables.json?form[dbname]=quicknotes');
-        // Из iframe ответ двойной: массив в resp.data.data; прямой вызов: resp.data
-        const items = resp?.data?.data ?? (Array.isArray(resp?.data) ? resp.data : []);
-        return items.length > 0;
+        return !!(resp && resp.data && Array.isArray(resp.data) && resp.data.length > 0);
     } catch (e) {}
     return false;
 }
@@ -61,46 +59,9 @@ async function checkCatalogExists(catalogName) {
     try {
         const tablename = catalogName.replace('custom_', '');
         const resp = await App.fetch('/db/custom_dbtables.json?form[dbname]=' + tablename);
-        const items = resp?.data?.data ?? (Array.isArray(resp?.data) ? resp.data : []);
-        return items.length > 0;
+        return !!(resp && resp.data && Array.isArray(resp.data) && resp.data.length > 0);
     } catch (e) {}
     return false;
-}
-```
-
-#### Идемпотентность установщика: "уже используется" и "duplicate" — норма
-
-Физическая таблица в БД **шарится между всеми аккаунтами** в одном облаке (разные `from_group`, одна физическая таблица `crm__custom_{dbname}`). Это значит:
-
-- Пользователь А установил приложение → таблица и поля созданы физически
-- Пользователь Б устанавливает то же приложение → `createTable` вернёт `"уже используется"`, `createField` вернёт `"duplicate"`
-- Это **штатное поведение**, не ошибка: таблица уже существует, установщик должен просто добавить права (`configureAccess`) и двигаться дальше
-
-Пока аккаунты в одном облаке без изолированных баз, код установщика обязан обрабатывать эти ответы как успех:
-
-```js
-async function createTable() {
-    const resp = await App.fetch('/db/custom_dbtables/add?edit&ajax=1', {
-        method: 'POST',
-        body: { /* ... */ }
-    });
-    const status  = resp?.data?.status ?? resp?.status;
-    const message = resp?.data?.message ?? resp?.message ?? '';
-    // "уже используется" = таблица есть от другого аккаунта, всё в порядке
-    if (status === 'error' && message.includes('уже использу')) return;
-    if (status !== 'ok') throw new Error(`createTable: ${message || JSON.stringify(resp)}`);
-}
-
-async function createField(field) {
-    const resp = await App.fetch('/db/custom_dbfields/add?edit&ajax=1', {
-        method: 'POST',
-        body: { /* ... */ }
-    });
-    const status  = resp?.data?.status ?? resp?.status;
-    const message = resp?.data?.message ?? resp?.message ?? '';
-    // "duplicate" = поле уже существует физически от другого аккаунта
-    if (status === 'error' && /duplicate|уже использу/i.test(message)) return;
-    if (status !== 'ok') throw new Error(`createField(${field.dbname}): ${message || JSON.stringify(resp)}`);
 }
 ```
 
@@ -437,15 +398,14 @@ curl -s -X POST "$API_URL/api/db/custom_dbfields" \
 
 ```js
 async function configureAccess(catalog, defaultValue = 2) {
-    const schemaResp = await App.fetch('/db/access_db/sheme.json');
-    // Из iframe ответ двойной: поля в schemaResp.data.data; прямой вызов: schemaResp.data
-    const schemaFields = schemaResp?.data?.data ?? schemaResp?.data ?? {};
-    const acctypeFields = Object.keys(schemaFields)
+    const schema = await App.fetch('/db/access_db/sheme.json');
+    const acctypeFields = Object.keys(schema.data || {})
         .filter(k => k.startsWith('acctype_'));
 
     // Проверить существует ли запись
-    const existingResp = await App.fetch(`/db/access_db.json?form[dbmodule]=${catalog}`);
-    const existing = (existingResp?.data?.data ?? (Array.isArray(existingResp?.data) ? existingResp.data : []))?.[0];
+    const existing = (await App.fetch(
+        `/db/access_db.json?form[dbmodule]=${catalog}`
+    )).data?.[0];
 
     const body = {
         'form[dbmodule]': catalog,
@@ -530,15 +490,14 @@ function uid() {
 
 async function configureAccess(catalog, defaultValue = 2) {
     // 1. Получить список полей acctype_* из схемы
-    const schemaResp = await App.fetch('/db/access_db/sheme.json');
-    // Из iframe postMessage оборачивает ответ: поля в .data.data; прямой вызов: .data
-    const schemaFields = schemaResp?.data?.data ?? schemaResp?.data ?? {};
-    const acctypeFields = Object.keys(schemaFields)
+    const schema = await App.fetch('/db/access_db/sheme.json');
+    const acctypeFields = Object.keys(schema.data || {})
         .filter(k => k.startsWith('acctype_'));
 
     // 2. Проверить существует ли запись для нашего каталога
-    const existingResp = await App.fetch(`/db/access_db.json?form[dbmodule]=${catalog}`);
-    const existing = (existingResp?.data?.data ?? (Array.isArray(existingResp?.data) ? existingResp.data : []))?.[0];
+    const existing = (await App.fetch(
+        `/db/access_db.json?form[dbmodule]=${catalog}`
+    )).data?.[0];
 
     // 3. Собрать body со всеми acctype_* = defaultValue
     const body = {

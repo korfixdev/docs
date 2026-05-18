@@ -147,11 +147,8 @@ const resp = await App.fetch('/db/custom_dbtables/add?edit&ajax=1', {
         submit: 1
     }
 });
-// ⚠️ Из iframe resp оборачивается: status в resp.data.status, не resp.status
-const status = resp?.data?.status ?? resp?.status;
-const message = resp?.data?.message ?? resp?.message;
-if (!resp || status === 'error' || status === 'no') {
-    throw new Error(message || JSON.stringify(resp));
+if (!resp || resp.status === 'error' || resp.status === 'no') {
+    throw new Error(resp?.message || JSON.stringify(resp));
 }
 ```
 
@@ -167,13 +164,10 @@ if (!resp || status === 'error' || status === 'no') {
 **Паттерн-хелпер**, чтобы не копировать проверку везде:
 
 ```js
-// Работает и из iframe (resp.data.status), и напрямую (resp.status)
 async function appFetch(url, options) {
     const resp = await App.fetch(url, options);
-    const status = resp?.data?.status ?? resp?.status;
-    const message = resp?.data?.message ?? resp?.message;
-    if (!resp || status === 'error' || status === 'no') {
-        throw new Error(`${url}: ${message || JSON.stringify(resp)}`);
+    if (!resp || resp.status === 'error' || resp.status === 'no') {
+        throw new Error(`${url}: ${resp?.message || JSON.stringify(resp)}`);
     }
     return resp;
 }
@@ -183,7 +177,7 @@ const resp = await appFetch('/db/custom_dbtables/add?edit&ajax=1', {
     method: 'POST',
     body: { ... }
 });
-// если дошли сюда — всё ок, resp.data.data содержит результат (из iframe)
+// если дошли сюда — всё ок, resp.data содержит результат
 ```
 
 Для чтения (`GET /db/.json`) проверка тоже полезна, но там в ошибке обычно HTTP-статус ≠ 200 — `App.fetch` может вернуть сам HTTP response.
@@ -196,11 +190,8 @@ const resp = await appFetch('/db/custom_dbtables/add?edit&ajax=1', {
 
 ```js
 const resp = await App.fetch('/db/projects.json');
-// ⚠️ App.fetch из iframe оборачивает ответ через postMessage:
-//   resp.data       = серверный JSON {data: [...], total: N, status: 'ok'}
-//   resp.data.data  = сам массив элементов
-//   resp.data.total = общее количество
-// Используй asArray(resp) — безопасно в обоих контекстах (см. ниже)
+// resp.data — массив элементов
+// resp.total — общее количество
 
 // С фильтром
 const resp = await App.fetch('/db/projects.json?form[status]=active');
@@ -260,31 +251,21 @@ const all = await App.fetchAll('/db/projects.json');
 > const resp = await App.fetch('/api/db/dashboards?limit=999');
 > ```
 
-**Важно: нормализация ответа.** Когда `App.fetch` вызван внутри iframe, ответ
-оборачивается слоем postMessage: массив лежит в `resp.data.data` (не `resp.data`).
-При прямом вызове (вне iframe) — в `resp.data`. **Всегда** приводите к массиву
-через хелпер, который обрабатывает оба случая:
+**Важно: нормализация ответа.** `resp.data` не всегда массив — может быть
+объектом (единичная запись), `null`, или вложенным `resp.data.data`
+(при проксировании через `App.fetch`). **Всегда** приводите к массиву:
 
 ```js
-// Безопасное извлечение массива данных (работает и из iframe, и напрямую)
+// Безопасное извлечение массива данных
 function asArray(resp) {
-    if (Array.isArray(resp?.data?.data)) return resp.data.data; // iframe: postMessage-обёртка
-    if (Array.isArray(resp?.data)) return resp.data;            // прямой вызов
+    if (Array.isArray(resp?.data)) return resp.data;
+    if (Array.isArray(resp?.data?.data)) return resp.data.data;
     return [];
 }
 
 const projects = asArray(await App.fetchAll('/db/tt_projects.json'));
 const tasks    = asArray(await App.fetchAll('/db/tt_tasks.json'));
 // Теперь .sort(), .filter(), .map() безопасны
-```
-
-Аналогично для доступа к полям схемы:
-
-```js
-// Схема каталога через App.fetch из iframe
-const schemaResp = await App.fetch('/db/projects/sheme.json');
-const fields = schemaResp?.data?.data ?? schemaResp?.data ?? {};
-// fields.from_auth.arr, fields.status.arr, ...
 ```
 
 ### Чтение одного элемента
@@ -364,10 +345,8 @@ await App.fetch('/db/projects/add?edit&ajax=1', {
 
 ```js
 // Загружаем схему — from_auth.arr содержит {0: 'Всем', USER_ID: 'Персональный'}
-const schemaResp = await App.fetch('/db/dashboard_widgets/sheme.json');
-// Из iframe ответ двойной: fields в schemaResp.data.data; прямой вызов: schemaResp.data
-const fields = schemaResp?.data?.data ?? schemaResp?.data ?? {};
-const fromAuthArr = fields.from_auth?.arr || {};
+const schema = await App.fetch('/db/dashboard_widgets/sheme.json');
+const fromAuthArr = schema?.data?.from_auth?.arr || {};
 const currentUserId = Object.keys(fromAuthArr).find(k => k !== '0') || 0;
 ```
 
@@ -375,9 +354,8 @@ const currentUserId = Object.keys(fromAuthArr).find(k => k !== '0') || 0;
 
 ```js
 // Определяем ID текущего пользователя
-const schemaResp = await App.fetch('/db/my_catalog/sheme.json');
-const fields = schemaResp?.data?.data ?? schemaResp?.data ?? {};
-const arr = fields.from_auth?.arr || {};
+const schema = await App.fetch('/db/my_catalog/sheme.json');
+const arr = schema?.data?.from_auth?.arr || {};
 const userId = Object.keys(arr).find(k => k !== '0') || 0;
 
 for (const item of items) {
@@ -490,16 +468,14 @@ body: {
 ### Получение схемы каталога
 
 ```js
-const schemaResp = await App.fetch('/db/projects/sheme.json');
-// Из iframe ответ двойной: schema.data = {data: {fields...}, status:'ok'}
-// Используй: const fields = schemaResp?.data?.data ?? schemaResp?.data ?? {}
-const fields = schemaResp?.data?.data ?? schemaResp?.data ?? {};
+const schema = await App.fetch('/db/projects/sheme.json');
+// schema.data — объект с описаниями полей по ключам
 ```
 
 Для полей типа `select` — варианты в `arr`:
 
 ```js
-const statusField = fields.status;
+const statusField = schema.data.status;
 // statusField.type = 'select'
 // statusField.arr = {0: 'Новый', 10: 'В работе', 40: 'Завершено'}
 ```
@@ -507,7 +483,7 @@ const statusField = fields.status;
 Для полей типа `select_from_table` — варианты в `arr` (до 200 записей), плюс метаданные:
 
 ```js
-const personField = fields.person_id;
+const personField = schema.data.person_id;
 // personField.type = 'select_from_table'
 // personField.catalog = 'auth_pers'           — имя связанного каталога
 // personField.total = 18                      — общее количество записей
@@ -519,9 +495,8 @@ const personField = fields.person_id;
 Для небольших справочников (total <= 200) — `arr` содержит все варианты:
 
 ```js
-const schemaResp = await App.fetch('/db/tt_tasks/sheme.json');
-const schemaFields = schemaResp?.data?.data ?? schemaResp?.data ?? {};
-const options = schemaFields.person_id.arr;
+const schema = await App.fetch('/db/tt_tasks/sheme.json');
+const options = schema.data.person_id.arr;
 const select = document.getElementById('personSelect');
 for (const [id, name] of Object.entries(options)) {
     select.add(new Option(name, id));
@@ -531,11 +506,11 @@ for (const [id, name] of Object.entries(options)) {
 Для больших справочников (total > 200) — пагинация по конкретному полю:
 
 ```js
-const schemaField = schemaFields.client_id;
-if (schemaField.total > Object.keys(schemaField.arr).length) {
+const field = schema.data.client_id;
+if (field.total > Object.keys(field.arr).length) {
     // Есть ещё страницы — загружаем вторую
     const page2 = await App.fetch('/db/tt_tasks/sheme.json?field=client_id&p=2');
-    const moreOptions = (page2?.data?.data ?? page2?.data ?? {}).client_id?.arr;
+    const moreOptions = page2.data.client_id.arr;
     // ... добавить в select или реализовать autocomplete
 }
 ```

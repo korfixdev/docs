@@ -61,6 +61,58 @@ theme:
 
 plugins:
   - search
+  - i18n:
+      docs_structure: folder
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: ru
+          name: Русский
+          build: true
+          nav_translations:
+            Home: Главная
+            Update plugins: Обновить плагины
+            Miniapps: Миниапы
+            Overview: Обзор
+            Getting started: Начало работы
+            Rules: Правила
+            First miniapp: Первое приложение
+            Core API: Core API
+            Config & entry points: Config и точки входа
+            JS API (VMCRMUserApp): JS API (VMCRMUserApp)
+            Data API: Data API
+            Storage & hooks: Storage и хуки
+            UI & Dashboards: UI и дашборды
+            Styling: Стилизация
+            Dashboards: Дашборды
+            App architecture: Архитектура приложения
+            Frame conventions: Конвенции фреймов
+            Platform features: Фичи платформы
+            Self-provisioning: Self-provisioning
+            Catalog rules: Правила каталогов
+            Catalog settings: Настройки каталогов
+            DB views: DB views
+            Catalog reference: Справочник каталогов
+            All catalogs: Все каталоги
+            Favorites menu: Меню избранного
+            Push settings: Настройки push
+            Help content: Контент справки
+            Access statuses: Статусы доступа
+            Bitrix24 sync: Синхронизация Bitrix24
+            Release: Релиз
+            Deploy: Деплой
+            Checklist: Чеклист
+            Gamedev: Геймдев
+            Game concepts: Концепции игр
+            Game config: Конфиг игры
+            Client API: Client API
+            API Reference: Справочник API
+            Recipes: Рецепты
+            Walkthrough: Пошаговый пример
+            Game styling: Стилизация игр
+            Game checklist: Чеклист игры
 
 markdown_extensions:
   - admonition
@@ -87,6 +139,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Update plugins: plugin-update.md
   - Miniapps:
     - Overview: miniapps/index.md
     - Getting started:
@@ -100,6 +153,8 @@ nav:
     - UI & Dashboards:
       - Styling: miniapps/styling.md
       - Dashboards: miniapps/dashboards.md
+    - App architecture:
+      - Frame conventions: miniapps/frames.md
     - Platform features:
       - Self-provisioning: miniapps/self-provisioning.md
       - Catalog rules: miniapps/catalog-rules.md
@@ -115,6 +170,17 @@ nav:
     - Release:
       - Deploy: miniapps/deploy.md
       - Checklist: miniapps/checklist.md
+  - Gamedev:
+    - Overview: gamedev/index.md
+    - Game concepts: gamedev/concepts.md
+    - Game config: gamedev/config-korgames.md
+    - Client API: gamedev/client-api.md
+    - API Reference: gamedev/api-reference.md
+    - Recipes: gamedev/recipes.md
+    - Walkthrough: gamedev/coin-clicker-walkthrough.md
+    - Game styling: gamedev/styling.md
+    - Game checklist: gamedev/checklist.md
+    - Project structure: gamedev/project-structure.md
 
 extra:
   social:
