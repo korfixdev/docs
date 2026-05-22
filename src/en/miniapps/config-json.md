@@ -178,6 +178,32 @@ When installed, the marketplace page shows the list of requested permissions.
 
 ---
 
+## Category
+
+In `config.json` set the `"category": <int>` field — a numeric id from the canonical table:
+
+| id | category  | When to pick                                                              |
+|----|-----------|---------------------------------------------------------------------------|
+| 1  | AI-agents | AI assistants, chatbots, generative tools, agents                         |
+| 2  | Business  | CRM extensions, reports, dashboards, B2B integrations                     |
+| 3  | Games     | Games, entertainment miniapps                                             |
+| 4  | Tools     | Utilities, converters, widgets, dev tools                                 |
+| 5  | Other     | Everything else / no good fit                                             |
+
+The platform writes `category` to the database automatically on the first app install (if the field is still empty). Later edits go through the `/db/marketplace` catalog UI and **are not overwritten** on subsequent deploys.
+
+Example:
+
+```json
+{
+  "name": "Coin Clicker",
+  "category": 3,
+  "package": "coin-clicker"
+}
+```
+
+---
+
 ## Dashboard embedding
 
 Apps can be embedded in the dashboard as **full widgets** with drag/drop,

@@ -7,7 +7,13 @@ An isolated key-value store for each installed app, plus webhooks and afterSave.
 
 ---
 
-Each installed app has an isolated storage (bound by token).
+Each installed app has an isolated storage (bound by token — the `alias` of the `installed_apps` record).
+
+> ⚠️ **Reinstalling an app destroys its storage.**
+> When you uninstall and reinstall, a new `installed_apps` record is created with a new `token`.
+> The old `apps_storage` records are left orphaned and inaccessible to the new `token`.
+> If the data matters — export or migrate it before uninstall, or use a
+> **custom catalog** (`custom_dbtables`) instead: it is bound to the group and survives reinstallation.
 
 > **Important: storage is isolated per user, not just per app.**
 > Each record stores `from_auth` (user ID). Manager A and Manager B
