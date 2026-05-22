@@ -63,6 +63,11 @@ Documentation for developing marketplace applications (miniapps) for the Korfix 
 | [deploy.md](deploy.md) | Packaging, uploading, CI/CD |
 | [checklist.md](checklist.md) | Pre-release checklist |
 
+### Backend development (certified developers only)
+| File | Description |
+|------|-------------|
+| [backend-development.md](backend-development.md) | PHP code in a miniapp: when you need it, sandbox limits, security requirements (F1-F11), SSRF guard, n8n-monitor reference, pre-deploy checklist. **Restricted access.** |
+
 ---
 
 ## Task → Which Files to Read

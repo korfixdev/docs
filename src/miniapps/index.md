@@ -3,7 +3,6 @@
 Документация для разработки маркетплейс-приложений (миниапов) платформы Korfix / VMCRM.
 
 > **Первый документ:** [rules.md](rules.md) — правила песочницы, запреты, принципы. **Читать до начала работы.**
-> Серверная архитектура, хуки ядра, инфраструктура — в [../backend/index.md](../backend/index.md)
 
 ---
 
@@ -63,6 +62,11 @@
 | [deploy.md](deploy.md) | Упаковка, загрузка, CI/CD |
 | [checklist.md](checklist.md) | Перед релизом |
 
+### Backend-разработка (только для сертифицированных)
+| Файл | Описание |
+|------|----------|
+| [backend-development.md](backend-development.md) | PHP-часть в миниапе: когда нужен, sandbox, security requirements (F1-F11), SSRF guard, эталон n8n-monitor, pre-deploy checklist. **Доступ ограничен.** |
+
 ---
 
 ## Задача → какие файлы читать
@@ -84,6 +88,12 @@
 | Стилизовать UI под платформу | [styling.md](styling.md) |
 | Задеплоить приложение | [deploy.md](deploy.md) |
 | Проверить приложение перед релизом | [checklist.md](checklist.md) |
+
+---
+
+## Использование без Claude Code
+
+Работаете в Codex, Cursor или другом AI без поддержки плагинов? → [codex-integration.md](codex-integration.md)
 
 ---
 

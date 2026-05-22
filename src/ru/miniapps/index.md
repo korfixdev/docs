@@ -63,6 +63,11 @@
 | [deploy.md](deploy.md) | Упаковка, загрузка, CI/CD |
 | [checklist.md](checklist.md) | Перед релизом |
 
+### Backend-разработка (только для сертифицированных)
+| Файл | Описание |
+|------|----------|
+| [backend-development.md](backend-development.md) | PHP-часть в миниапе: когда нужен, sandbox, security requirements (F1-F11), SSRF guard, эталон n8n-monitor, pre-deploy checklist. **Доступ ограничен.** |
+
 ---
 
 ## Задача → какие файлы читать
