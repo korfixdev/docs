@@ -19,9 +19,12 @@ Planned: `src/catalogs/` (business catalog reference), `src/workflows/` (automat
 
 ## Contributing
 
-1. Fork → edit → PR. New file — add link to `src/miniapps/index.md` and include "See also" block at top.
-2. Every doc has a top block `> **См. также:**` with 2-4 links to related topics and `> **← [Home](index.md)**`. At the bottom — `**Дальше:** X · **← [Home](index.md)**` for linear reading, or just `← Home` for reference docs.
-3. Code examples should be working — runnable via copy-paste.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full rules. Two things to remember:
+
+1. **English first.** All content authored under `src/en/`, then mirrored to `src/ru/`. PRs include both files.
+2. **No `.md` at `src/` root.** Files live in `src/en/` and `src/ru/` only — root conflicts abort the build.
+
+Page conventions (See also block at top, Next at bottom, runnable code, no secrets) — same in both languages.
 
 ## Site build
 
@@ -65,9 +68,12 @@ info@korfix.ru
 
 ## Контрибьюция
 
-1. Fork → правка → PR. Новый файл — обязательно добавь ссылку в `src/miniapps/index.md` и блок «См. также» в шапку.
-2. Каждый документ содержит вверху блок `> **См. также:**` с 2-4 ссылками на смежные темы и `> **← [Home](index.md)**`. Внизу — `**Дальше:** X · **← [Home](index.md)**` для линейного чтения, или только `← Home` для справочников.
-3. Примеры кода — рабочие, должны запускаться копипастой.
+Полные правила — в [CONTRIBUTING.md](CONTRIBUTING.md). Главное:
+
+1. **Сначала английский.** Контент пишется в `src/en/`, потом зеркалится в `src/ru/`. PR содержит обе версии.
+2. **В корне `src/` файлов `.md` нет.** Только `src/en/` и `src/ru/` — дубли в корне ломают сборку.
+
+Page conventions (блок «См. также» наверху, «Дальше» внизу, рабочий код, без секретов) — те же для обоих языков.
 
 ## Сборка сайта
 
