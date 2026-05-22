@@ -2,6 +2,8 @@
 
 Public documentation for the Korfix platform — ERP, miniapp marketplace, AI development SDK.
 
+**New here?** Start with the [Quick Start](quick-start.md) — register, install the plugin, get a token, ship your first miniapp through AI.
+
 ## Sections
 
 - 📘 [miniapps/](miniapps/index.md) — marketplace miniapp development (HTML+JS+CSS in iframe, platform API)

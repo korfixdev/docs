@@ -73,6 +73,7 @@ plugins:
           build: true
           nav_translations:
             Home: Главная
+            Quick Start: Быстрый старт
             Update plugins: Обновить плагины
             Miniapps: Миниапы
             Overview: Обзор
@@ -139,6 +140,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Quick Start: quick-start.md
   - Update plugins: plugin-update.md
   - Miniapps:
     - Overview: miniapps/index.md
@@ -183,6 +185,13 @@ nav:
     - Project structure: gamedev/project-structure.md
 
 extra:
+  alternate:
+    - name: English
+      link: ""
+      lang: en
+    - name: Русский
+      link: ru/
+      lang: ru
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/korfixdev
