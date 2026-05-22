@@ -322,6 +322,62 @@ $expected = hash_hmac('sha256', $payload, $secret);
 if (!hash_equals($expected, $received)) { /* reject */ }
 ```
 
+### Whitelist methods and headers in proxy-style apps
+
+If the frontend passes `method` and `headers` to your proxy script — don't forward them as-is. Arbitrary headers (especially `Host:`) can bypass your DNS-pinning, and non-standard methods (`CONNECT`, `OPTIONS`, `TRACE`) add attack vectors.
+
+```php
+// ✅ Method whitelist
+$method = strtoupper((string)($input['method'] ?? 'GET'));
+if (!in_array($method, ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+    http_response_code(400); exit('{"error":"method not allowed"}');
+}
+
+// ✅ Header whitelist + CRLF injection guard
+$allowed = ['authorization', 'x-api-key', 'content-type', 'accept'];
+$safeHeaders = [];
+foreach ((array)($input['headers'] ?? []) as $h) {
+    if (!is_string($h) || preg_match('/[\r\n]/', $h)) continue;  // CRLF = response splitting
+    $name = strtolower(trim(strstr($h, ':', true) ?: ''));
+    if (in_array($name, $allowed, true)) $safeHeaders[] = $h;
+}
+```
+
+### Caps on request body and response size
+
+```php
+// ✅ Cap on incoming payload (Apache post_max_size 16M is too generous for a JSON API)
+if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 64 * 1024) {
+    http_response_code(413); exit('{"error":"payload too large"}');
+}
+
+// ✅ Cap on upstream response — OOM protection
+curl_setopt($ch, CURLOPT_MAXFILESIZE, 8 * 1024 * 1024);   // 8 MB cap
+```
+
+### IPv6 in CURLOPT_RESOLVE — brackets are required
+
+```php
+// ❌ Breaks on IPv6: "myhost:443:2001:db8::1" — curl parses it wrong
+CURLOPT_RESOLVE => ["$host:$port:$ip"]
+
+// ✅
+$resolveIp = (strpos($ip, ':') !== false) ? "[$ip]" : $ip;
+CURLOPT_RESOLVE => ["$host:$port:$resolveIp"]
+```
+
+### Generic upstream errors in response
+
+`curl_error()` may contain the IP/hostname of a specific backend server. That's topology leakage — return a generic 502 to the caller, log details to Apache error_log (admin-only).
+
+```php
+if ($err) {
+    error_log("[proxy] curl error for host=$host: $err");   // detail in admin log
+    http_response_code(502);
+    exit('{"error":"upstream unreachable"}');               // generic response
+}
+```
+
 ---
 
 ## Reference implementation: n8n-monitor

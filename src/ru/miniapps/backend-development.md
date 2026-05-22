@@ -322,6 +322,62 @@ $expected = hash_hmac('sha256', $payload, $secret);
 if (!hash_equals($expected, $received)) { /* reject */ }
 ```
 
+### Whitelist методов и заголовков в proxy-апах
+
+Если фронт передаёт `method` и `headers` в proxy-скрипт — не пропускайте их «как есть». Произвольные заголовки (особенно `Host:`) могут обойти ваш DNS-pinning, а нестандартные методы (`CONNECT`, `OPTIONS`, `TRACE`) — добавить вектора атаки.
+
+```php
+// ✅ Method whitelist
+$method = strtoupper((string)($input['method'] ?? 'GET'));
+if (!in_array($method, ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+    http_response_code(400); exit('{"error":"method not allowed"}');
+}
+
+// ✅ Header whitelist + CRLF injection guard
+$allowed = ['authorization', 'x-api-key', 'content-type', 'accept'];
+$safeHeaders = [];
+foreach ((array)($input['headers'] ?? []) as $h) {
+    if (!is_string($h) || preg_match('/[\r\n]/', $h)) continue;  // CRLF = response splitting
+    $name = strtolower(trim(strstr($h, ':', true) ?: ''));
+    if (in_array($name, $allowed, true)) $safeHeaders[] = $h;
+}
+```
+
+### Лимиты на размер тела и ответа
+
+```php
+// ✅ Лимит на входящий payload (Apache post_max_size 16M — слишком много для JSON-API)
+if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 64 * 1024) {
+    http_response_code(413); exit('{"error":"payload too large"}');
+}
+
+// ✅ Лимит на ответ от upstream — защита от OOM
+curl_setopt($ch, CURLOPT_MAXFILESIZE, 8 * 1024 * 1024);   // 8 MB cap
+```
+
+### IPv6 в CURLOPT_RESOLVE — обязательны квадратные скобки
+
+```php
+// ❌ Сломается для IPv6: "myhost:443:2001:db8::1" curl парсит неправильно
+CURLOPT_RESOLVE => ["$host:$port:$ip"]
+
+// ✅
+$resolveIp = (strpos($ip, ':') !== false) ? "[$ip]" : $ip;
+CURLOPT_RESOLVE => ["$host:$port:$resolveIp"]
+```
+
+### Generic upstream errors в response
+
+`curl_error()` может содержать IP/имя конкретного backend-сервера. Это утечка топологии — лучше отдать generic 502, а детали в Apache error_log (читает только админ).
+
+```php
+if ($err) {
+    error_log("[proxy] curl error for host=$host: $err");   // detail in admin log
+    http_response_code(502);
+    exit('{"error":"upstream unreachable"}');               // generic response
+}
+```
+
 ---
 
 ## Эталон: n8n-monitor
