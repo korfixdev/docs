@@ -133,7 +133,7 @@ curl https://panel.korfix.ru/db/tt_tasks.json              # ✗ 302
 cd my-app
 zip -r /tmp/my-app.zip config.json widget.html logo.svg
 
-curl -X POST "https://panel-korfix.vnn.ru/api/db/marketplace/{ID}?token={TOKEN}" \
+curl -X POST "https://vibe.korfix.app/api/db/marketplace/{ID}?token={TOKEN}" \
   -F "doc1=@/tmp/my-app.zip;type=application/zip"
 ```
 

@@ -247,7 +247,7 @@ async function uploadAvatar(file) {
 <img src="https://{CRM_HOST}/reimg/data/db/f_sys_game_profiles/avatar_3_xxx.png?80x80">
 ```
 
-**ВАЖНО — путь должен быть АБСОЛЮТНЫМ.** Iframe миниапа живёт на store-домене (`vmcrm.vnn.ru`), а файлы в `/reimg/` и `/data/` — на CRM-домене (`panel-korfix.vnn.ru`). Относительный `src="/reimg/..."` резолвится к store-домену → 404.
+**ВАЖНО — путь должен быть АБСОЛЮТНЫМ.** Iframe миниапа живёт на store-домене (`vmcrm.vnn.ru`), а файлы в `/reimg/` и `/data/` — на CRM-домене (`vibe.korfix.app`). Относительный `src="/reimg/..."` резолвится к store-домену → 404.
 
 CRM-хост лежит в `App.requestParams.domain` после `getRequestParams()`. Хелпер:
 
@@ -260,7 +260,7 @@ function absUrl(path) {
 }
 
 // Использование
-img.src = absUrl(profile.avatar_url);  // '/reimg/...' → 'https://panel-korfix.vnn.ru/reimg/...'
+img.src = absUrl(profile.avatar_url);  // '/reimg/...' → 'https://vibe.korfix.app/reimg/...'
 ```
 
 Применять к **любым** ссылкам на платформенные ресурсы:

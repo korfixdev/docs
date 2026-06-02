@@ -290,7 +290,7 @@ cd /tmp/coin-clicker
 zip -rq /tmp/coin-clicker.zip config.json index.html icon.svg css/ js/
 
 # deploy (update + refresh in one call)
-curl -X POST "https://panel-korfix.vnn.ru/api/marketplace/deploy/109" \
+curl -X POST "https://vibe.korfix.app/api/marketplace/deploy/109" \
   -H "Authorization: Bearer $KORFIX_TOKEN" \
   -F "doc1=@/tmp/coin-clicker.zip;type=application/zip"
 ```
@@ -298,7 +298,7 @@ curl -X POST "https://panel-korfix.vnn.ru/api/marketplace/deploy/109" \
 Deploying a new app (when there's no id yet):
 
 ```bash
-curl -X POST "https://panel-korfix.vnn.ru/api/db/marketplace" \
+curl -X POST "https://vibe.korfix.app/api/db/marketplace" \
   -H "Authorization: Bearer $KORFIX_TOKEN" \
   -F 'name=Coin Clicker' \
   -F 'category=games' \

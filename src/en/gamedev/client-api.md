@@ -247,7 +247,7 @@ Display with auto-resize via reimg:
 <img src="https://{CRM_HOST}/reimg/data/db/f_sys_game_profiles/avatar_3_xxx.png?80x80">
 ```
 
-**IMPORTANT — the path must be ABSOLUTE.** The miniapp iframe lives on the store domain (`vmcrm.vnn.ru`), while files in `/reimg/` and `/data/` are on the CRM domain (`panel-korfix.vnn.ru`). A relative `src="/reimg/..."` resolves to the store domain → 404.
+**IMPORTANT — the path must be ABSOLUTE.** The miniapp iframe lives on the store domain (`vmcrm.vnn.ru`), while files in `/reimg/` and `/data/` are on the CRM domain (`vibe.korfix.app`). A relative `src="/reimg/..."` resolves to the store domain → 404.
 
 The CRM host is in `App.requestParams.domain` after `getRequestParams()`. Helper:
 
@@ -260,7 +260,7 @@ function absUrl(path) {
 }
 
 // Usage
-img.src = absUrl(profile.avatar_url);  // '/reimg/...' → 'https://panel-korfix.vnn.ru/reimg/...'
+img.src = absUrl(profile.avatar_url);  // '/reimg/...' → 'https://vibe.korfix.app/reimg/...'
 ```
 
 Apply to **any** links to platform resources:
