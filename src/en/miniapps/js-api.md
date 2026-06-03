@@ -68,6 +68,55 @@ App.on('*', ({event, data}) => {
 | `modal.closed` | Закрытие модалки | `{url}` |
 | `catalog.selected` | Выбор чекбоксов в списке каталога | `{catalog, ids}` |
 
+#### Pattern: reload list after record edit
+
+`modal.closed` fires when the user closes a modal opened via `App.modal()`. `data.url`
+contains the same URL that was passed to `App.modal()`. Filter by it so you don't react
+to unrelated modals. A 50 ms debounce prevents double-firing.
+
+```js
+// Open the edit modal
+App.modal('/db/tt_projects/' + alias + '?edit', { title: 'Edit' });
+
+// React to close — data.url matches the URL from App.modal()
+let _reloadTimer = 0;
+App.on('modal.closed', (data) => {
+    if (data?.url?.includes('/tt_projects/')) {
+        clearTimeout(_reloadTimer);
+        _reloadTimer = setTimeout(() => loadRecords(), 50);
+    }
+});
+```
+
+#### Pattern: background polling (detect external changes)
+
+Track a snapshot: total count + top-5 record IDs sorted by `ts_desc`. Any edit moves
+a record to the top — the signature changes and the list reloads.
+
+```js
+let _pollSnap = { total: -1, topIds: '' };
+
+// After first load: seed the baseline
+_pollSnap = { total: records.length, topIds: records.slice(0,5).map(r=>r.id).join(',') };
+
+// Polling
+setInterval(async () => {
+    try {
+        const r = await App.fetch('/db/MY_CATALOG.json?limit=5&order=ts_desc&not_cache=1');
+        const rows = Array.isArray(r?.data) ? r.data : (r?.data?.data ?? []);
+        const total = Number(r?.total ?? rows.length);
+        const topIds = rows.map(r => r.id).join(',');
+        if (_pollSnap.total >= 0 && (total !== _pollSnap.total || topIds !== _pollSnap.topIds)) {
+            loadRecords();
+        }
+        _pollSnap = { total, topIds };
+    } catch (_) {}
+}, 60000);
+```
+
+Both patterns complement each other: `modal.closed` reacts instantly to the user's own
+actions; polling catches changes made by another user or outside the miniapp.
+
 ### Auto-resize
 
 Фрейм автоматически репортит высоту контента через `ResizeObserver`.

@@ -68,6 +68,55 @@ App.on('*', ({event, data}) => {
 | `modal.closed` | Закрытие модалки | `{url}` |
 | `catalog.selected` | Выбор чекбоксов в списке каталога | `{catalog, ids}` |
 
+#### Паттерн: перезагрузка списка после редактирования записи
+
+`modal.closed` срабатывает когда пользователь закрывает модалку, открытую через `App.modal()`.
+`data.url` содержит тот же URL что был передан в `App.modal()`. Фильтруй по нему чтобы не
+реагировать на чужие модалки. Дебаунс 50 мс защищает от двойного срабатывания.
+
+```js
+// Открываем модалку редактирования
+App.modal('/db/tt_projects/' + alias + '?edit', { title: 'Редактировать' });
+
+// Реагируем на закрытие — data.url содержит URL из App.modal()
+let _reloadTimer = 0;
+App.on('modal.closed', (data) => {
+    if (data?.url?.includes('/tt_projects/')) {
+        clearTimeout(_reloadTimer);
+        _reloadTimer = setTimeout(() => loadRecords(), 50);
+    }
+});
+```
+
+#### Паттерн: фоновый polling (обнаружение изменений без действий пользователя)
+
+Сохраняй снапшот: суммарный `total` + строку id топ-5 записей отсортированных по `ts_desc`.
+Любое редактирование двигает запись в топ — снапшот меняется, список перезагружается.
+
+```js
+let _pollSnap = { total: -1, topIds: '' };
+
+// После первой загрузки: проинициализируй baseline
+_pollSnap = { total: records.length, topIds: records.slice(0,5).map(r=>r.id).join(',') };
+
+// Polling
+setInterval(async () => {
+    try {
+        const r = await App.fetch('/db/MY_CATALOG.json?limit=5&order=ts_desc&not_cache=1');
+        const rows = Array.isArray(r?.data) ? r.data : (r?.data?.data ?? []);
+        const total = Number(r?.total ?? rows.length);
+        const topIds = rows.map(r => r.id).join(',');
+        if (_pollSnap.total >= 0 && (total !== _pollSnap.total || topIds !== _pollSnap.topIds)) {
+            loadRecords();
+        }
+        _pollSnap = { total, topIds };
+    } catch (_) {}
+}, 60000);
+```
+
+Оба паттерна хорошо сочетаются: `modal.closed` реагирует мгновенно на собственные
+действия, polling подхватывает изменения сделанные другим пользователем или вне миниапа.
+
 ### Auto-resize
 
 Фрейм автоматически репортит высоту контента через `ResizeObserver`.
