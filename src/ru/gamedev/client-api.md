@@ -247,6 +247,8 @@ async function uploadAvatar(file) {
 <img src="https://{CRM_HOST}/reimg/data/db/f_sys_game_profiles/avatar_3_xxx.png?80x80">
 ```
 
+### Absolute URLs (аватары, ресурсы платформы) {#absolute-urls}
+
 **ВАЖНО — путь должен быть АБСОЛЮТНЫМ.** Iframe миниапа живёт на store-домене (`vmcrm.vnn.ru`), а файлы в `/reimg/` и `/data/` — на CRM-домене (`vibe.korfix.app`). Относительный `src="/reimg/..."` резолвится к store-домену → 404.
 
 CRM-хост лежит в `App.requestParams.domain` после `getRequestParams()`. Хелпер:

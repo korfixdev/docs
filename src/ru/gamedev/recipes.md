@@ -387,6 +387,38 @@ await kg('/api/korgames/profile', {
 });
 ```
 
+### Полоса профиля в хедере (canonical)
+
+Имя + аватар + ссылка «редактировать профиль» в Games Hub. **Три места, где игры
+систематически ошибаются** — собраны вместе:
+
+```js
+async function renderProfileStrip() {
+    const p = (await kg('/api/korgames/profile'))?.data || {};
+
+    // 1. ИМЯ: только display_name. Поля name/username в ответе НЕТ —
+    //    fallback на них даёт вечный "Anonymous".
+    const name = p.display_name || 'Anonymous';
+
+    // 2. АВАТАР: absUrl обязателен. avatar_url приходит как '/reimg/...'
+    //    относительно store-домена → без absUrl будет 404.
+    nameEl.textContent = name;
+    if (p.avatar_url) {
+        avatarEl.innerHTML = `<img src="${absUrl(p.avatar_url)}" alt="${name}">`;
+    } else {
+        avatarEl.textContent = name.slice(0, 2).toUpperCase();
+    }
+
+    // 3. EDIT-ССЫЛКА: ведёт в Games Hub, вкладка profile.
+    //    Правильный URL — /db/installed_apps/{alias}?frame=main&tab=profile
+    //    (НЕ /app/{alias}/profile и НЕ /{alias}?tab=profile — это 404).
+    editLink.addEventListener('click', (e) => { e.preventDefault(); goToProfileTab(); });
+}
+```
+
+`absUrl` — из [client-api.md](client-api.md#absolute-urls). `goToProfileTab` — в разделе
+[Cross-app discovery](#cross-app-discovery-найти-другую-игру-hub-etc) ниже.
+
 ---
 
 ## Загрузка аватара (drag-drop или picker)
@@ -521,20 +553,34 @@ async function findAppByPackage(pkg, systemOnly = false) {
     const q = '/db/marketplace.json?form[package]=' + encodeURIComponent(pkg)
             + (systemOnly ? '&form[system]=1' : '') + '&limit=1';
     const r = await kg(q);
-    const rows = r?.data || r?.data?.data || [];
+    // r = {status, data: {total, data: [...]}} — нужен вложенный data
+    const rows = r?.data?.data || r?.data || [];
     return Array.isArray(rows) ? rows[0] : null;
 }
 
-// Найти Games Hub
+// Найти Games Hub и перейти в главный фрейм
 const hub = await findAppByPackage('games-hub', true);
 if (hub) {
-    // Проверить установлен ли
     const inst = await kg('/db/installed_apps.json?form[app_id]=' + hub.id + '&limit=1');
-    const installed = (inst?.data || [])[0];
-    if (installed) {
+    // inst?.data = {total, data: [...]} — нужен inst?.data?.data
+    const installed = (inst?.data?.data || inst?.data || [])[0];
+    if (installed?.alias) {
         App.navigate('/db/installed_apps/' + installed.alias + '?frame=main');
     } else {
-        App.navigate('/db/marketplace/' + hub.alias);  // на карточку для установки
+        App.navigate('/db/marketplace/' + hub.alias);
+    }
+}
+
+// Перейти сразу на вкладку профиля в Games Hub
+async function goToProfileTab() {
+    const hub = await findAppByPackage('games-hub', true);
+    if (!hub) { App.navigate('/db/sys_game_profiles'); return; }
+    const inst = await kg('/db/installed_apps.json?form[app_id]=' + hub.id + '&limit=1');
+    const installed = (inst?.data?.data || inst?.data || [])[0];
+    if (installed?.alias) {
+        App.navigate('/db/installed_apps/' + installed.alias + '?frame=main&tab=profile');
+    } else {
+        App.navigate('/db/marketplace/' + hub.alias);
     }
 }
 ```

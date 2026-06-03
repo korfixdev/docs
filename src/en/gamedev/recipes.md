@@ -385,6 +385,38 @@ await kg('/api/korgames/profile', {
 });
 ```
 
+### Header profile strip (canonical)
+
+Name + avatar + "edit profile" link to the Games Hub. **The three spots games
+systematically get wrong** — collected in one place:
+
+```js
+async function renderProfileStrip() {
+    const p = (await kg('/api/korgames/profile'))?.data || {};
+
+    // 1. NAME: display_name only. The response has NO name/username field —
+    //    falling back to them yields a permanent "Anonymous".
+    const name = p.display_name || 'Anonymous';
+
+    // 2. AVATAR: absUrl is mandatory. avatar_url arrives as '/reimg/...'
+    //    relative to the store domain → without absUrl it 404s.
+    nameEl.textContent = name;
+    if (p.avatar_url) {
+        avatarEl.innerHTML = `<img src="${absUrl(p.avatar_url)}" alt="${name}">`;
+    } else {
+        avatarEl.textContent = name.slice(0, 2).toUpperCase();
+    }
+
+    // 3. EDIT LINK: goes to the Games Hub, profile tab.
+    //    Correct URL — /db/installed_apps/{alias}?frame=main&tab=profile
+    //    (NOT /app/{alias}/profile and NOT /{alias}?tab=profile — those 404).
+    editLink.addEventListener('click', (e) => { e.preventDefault(); goToProfileTab(); });
+}
+```
+
+`absUrl` — from [client-api.md](client-api.md#absolute-urls). `goToProfileTab` — in the
+[Cross-app discovery](#cross-app-discovery-find-another-game-hub-etc) section below.
+
 ---
 
 ## Avatar Upload (drag-drop or picker)
@@ -519,20 +551,34 @@ async function findAppByPackage(pkg, systemOnly = false) {
     const q = '/db/marketplace.json?form[package]=' + encodeURIComponent(pkg)
             + (systemOnly ? '&form[system]=1' : '') + '&limit=1';
     const r = await kg(q);
-    const rows = r?.data || r?.data?.data || [];
+    // r = {status, data: {total, data: [...]}} — the rows are in the nested data
+    const rows = r?.data?.data || r?.data || [];
     return Array.isArray(rows) ? rows[0] : null;
 }
 
-// Find Games Hub
+// Find Games Hub and open its main frame
 const hub = await findAppByPackage('games-hub', true);
 if (hub) {
-    // Check if installed for user
     const inst = await kg('/db/installed_apps.json?form[app_id]=' + hub.id + '&limit=1');
-    const installed = (inst?.data || [])[0];
-    if (installed) {
+    // inst?.data = {total, data: [...]} — use inst?.data?.data
+    const installed = (inst?.data?.data || inst?.data || [])[0];
+    if (installed?.alias) {
         App.navigate('/db/installed_apps/' + installed.alias + '?frame=main');
     } else {
-        App.navigate('/db/marketplace/' + hub.alias);  // marketplace card for install
+        App.navigate('/db/marketplace/' + hub.alias);
+    }
+}
+
+// Open the Games Hub profile tab directly
+async function goToProfileTab() {
+    const hub = await findAppByPackage('games-hub', true);
+    if (!hub) { App.navigate('/db/sys_game_profiles'); return; }
+    const inst = await kg('/db/installed_apps.json?form[app_id]=' + hub.id + '&limit=1');
+    const installed = (inst?.data?.data || inst?.data || [])[0];
+    if (installed?.alias) {
+        App.navigate('/db/installed_apps/' + installed.alias + '?frame=main&tab=profile');
+    } else {
+        App.navigate('/db/marketplace/' + hub.alias);
     }
 }
 ```
