@@ -164,6 +164,19 @@ const resp = await App.fetch('/api/db/projects');
 const resp = await App.fetch('/db/currency_rate.json');
 ```
 
+> **Ловушка: не передавай `undefined`/`null` вторым аргументом.** Обёртка вида
+> `App.fetch(url, opts)`, где `opts === undefined` (типично для GET), ломается:
+> `undefined` сериализуется в `null` через postMessage, на хосте срабатывает
+> `typeof null === 'object'` → чтение `null.body` → исключение, и запрос **висит до
+> 60-сек таймаута** (молча: данные/профиль не грузятся, явной ошибки нет). В обёртке
+> ветви по наличию опций:
+> ```js
+> async function apiFetch(url, opts) {
+>     const r = opts ? await App.fetch(url, opts) : await App.fetch(url);
+>     return r?.data ?? r;
+> }
+> ```
+
 ### Подробности по методам
 
 #### getRequestParams()

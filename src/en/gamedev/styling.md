@@ -53,6 +53,22 @@ Reference — `etalon-apps/coin-clicker/styles/style.css` (`.cc-frame`).
 
 ---
 
+## Rule #1.5 — Canvas-game layout: a centered column
+
+The miniapp iframe **auto-resizes to content height** (the platform reports body height to the host). For canvas games (Flappy, breakout-likes) this creates a trap:
+
+- **Don't use `#app { height: 100% }` + `.canvas-wrap { flex: 1 }`.** The container stretches to the full iframe height while the canvas stays a fixed height. The game-over/start overlays (`position: absolute; inset: 0`) then cover the whole stretched container and end up **taller than the canvas** (overlay 980px, field 640px — the classic bug).
+- **Wrap everything in a centered column** (like coin-clicker):
+  ```css
+  #app { max-width: 380px; margin: 0 auto; }
+  .canvas-wrap { position: relative; /* NOT flex:1 */ }
+  ```
+  Now header, canvas and overlays share one width — a neat portrait column, not 320px lost in a 1000px row on desktop.
+- **The canvas fills the column width**, height follows the aspect (`ch = cw * ratio`). The container height equals the canvas — the iframe sizes itself to content.
+- A full-width layout makes a portrait aspect (e.g. 1.69) absurdly tall on desktop — half the field scrolls off-screen. The narrow column fixes that too.
+
+---
+
 ## Rule #2 — Korfix CSS Variables as the Base
 
 Colors, typography, buttons — use platform tokens:
