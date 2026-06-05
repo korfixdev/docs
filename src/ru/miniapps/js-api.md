@@ -39,7 +39,9 @@ const App = new VMCRMUserApp();
 | `App.setFrameSize(width, height)` | void | Размер фрейма. `null` пропускает параметр |
 | `App.startLoadingAnimation()` | void | Показать индикатор загрузки платформы |
 | `App.stopLoadingAnimation()` | void | Скрыть индикатор загрузки |
-| `App.storage.get(key, default?)` | Promise | Чтение из KV-хранилища |
+| `App.storage.getValue(key, default?)` | Promise | Голое значение + default (рекомендуется) |
+| `App.storage.get(key)` | Promise | Запись целиком `{name, value, alias, ...}` — читай `.value` |
+| `App.storage.getRow(key)` | Promise | Явный алиас `get()` |
 | `App.storage.set(key, value)` | Promise | Запись в KV-хранилище |
 | `App.storage.unset(key)` | Promise | Удаление из KV-хранилища |
 | `App.on(event, callback)` | this | Подписка на событие платформы. Chainable |

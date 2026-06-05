@@ -16,7 +16,7 @@ Korfix has **two different endpoints** for data access — they're commonly conf
 | **Inside the miniapp iframe** (`App.fetch`) | `/db/{catalog}.json` | browser session (cookie) | `form[name]=value` |
 | **Outside**: curl, tests, scripts, server integrations, webhooks, n8n, Bitrix24 | `/api/db/{catalog}` | `Authorization: Bearer <token>` | `name=value` (flat) |
 
-**Don't mix them up:** `/db/` from outside the iframe returns a 302 redirect to login (no session); `/api/db/` inside the iframe without a token returns 401. A common trap: an agent sees `/db/...` in app code, copies it to curl, gets a redirect, starts "fixing auth" — don't. Just replace `/db/` with `/api/db/` and add Bearer.
+**Don't mix them up:** `/db/` from outside the iframe returns a 302 redirect to login (no session). A common trap: an agent sees `/db/...` in app code, copies it to curl, gets a redirect, starts "fixing auth" — don't. Just replace `/db/` with `/api/db/` and add Bearer.
 
 ### Verifying catalog access before development
 
@@ -64,18 +64,21 @@ For server integrations, webhooks, and external apps.
 Token from `/db/api` — determines accessible catalogs and methods.
 
 ```js
-// From the app — with token in query string
-const resp = await App.fetch('/api/db/projects?token=YOUR_TOKEN');
+// Token auth is for EXTERNAL callers (curl / server / n8n) — see the Bearer/curl examples below.
+// Never hard-code a platform token inside a shipped miniapp (marketplace-review failure).
 
-// getcatalogs — list of accessible catalogs
-const catalogs = await App.fetch('/api/db/getcatalogs?token=YOUR_TOKEN');
-
-// /api/user/tariff — current user's billing info
+// /api/user/tariff — current user's billing info (from the app this works via session, no token)
 const billing = await App.fetch('/api/user/tariff');
 // data: { tarif, tarif_name, balance, discount, discount_date, payment_date, price, ... }
 ```
 
 **Setup**: `/db/api` → create a token → specify allowed API classes.
+
+> ℹ️ **Inside a miniapp, prefer `/db/...` (with `form[]`) and pass no token.** `App.fetch` proxies
+> through the logged-in parent window, so requests authenticate via the user **session** — you
+> never need a token, and you must never hard-code a platform token in a shipped miniapp
+> (marketplace-review failure). The Bearer-token path (`/api/db/...` + `Authorization: Bearer`)
+> is for **external** callers — curl / CI / server / n8n.
 
 ### When to use which
 

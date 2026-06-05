@@ -41,6 +41,19 @@ const all = await App.storage.get('');
 await App.storage.unset('my.setting');
 ```
 
+### getValue / getRow — reading values
+
+`get()` returns the full storage record (read `.value`). Two helpers make intent explicit:
+
+```js
+// getValue(key, def) — bare stored value, or def if the key is absent. Recommended.
+const lang = await App.storage.getValue('lang', 'en');   // symmetric with set(): getValue === the value passed to set()
+
+// getRow(key) — explicit alias of get(): full record {name, value, alias, app_id, ...}
+const rec = await App.storage.getRow('lang');
+const meta = rec?.alias;   // use when you need alias/metadata
+```
+
 > ⚠️ **`get()` returns a RECORD (object), not a value.** Common mistake:
 >
 > ```js

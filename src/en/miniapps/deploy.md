@@ -95,6 +95,29 @@ Before packaging, go through [checklist.md](checklist.md). Pay special attention
 
 ### Step 6: Package into zip
 
+> ✅ **The manifest is validated server-side on deploy.** Both `POST /api/db/marketplace/{id}`
+> and `POST /api/marketplace/deploy/{id}` validate the bundled `config.json` and the archive,
+> and return the verdict in the response — read it and fix, no need to open the app to discover
+> a broken manifest.
+>
+> **Errors block the deploy** (response `{"status":"error","message":"...list..."}`). Triggered by:
+> invalid JSON; missing `name`; missing or non-object `urls`; any file referenced in `urls.*` or
+> `logo` that isn't present in the zip. The `message` lists every problem at once. Example:
+> ```json
+> {"status":"error","message":"config.json: invalid JSON; field \"name\" is required; urls.widget -> widget.html not found in zip"}
+> ```
+>
+> **Warnings don't block** — the deploy succeeds and the response carries `warnings`. Triggered by
+> missing recommended fields: `package`, `permissions`, `about`. Example:
+> ```json
+> {"status":"success","id":"123","alias":"abc...","warnings":["field \"package\" is recommended","field \"about\" is recommended"]}
+> ```
+>
+> Still worth a local pre-flight before zipping:
+> ```bash
+> python3 -m json.tool config.json   # or: jq . config.json
+> ```
+
 ```bash
 # From the app directory:
 zip -r /tmp/my-app.zip config.json widget.html *.js *.css *.svg

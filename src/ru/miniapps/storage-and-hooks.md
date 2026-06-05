@@ -42,6 +42,19 @@ const all = await App.storage.get('');
 await App.storage.unset('my.setting');
 ```
 
+### getValue / getRow — чтение значений
+
+`get()` возвращает запись целиком (значение в `.value`). Два хелпера делают намерение явным:
+
+```js
+// getValue(key, def) — голое сохранённое значение, либо def если ключа нет. Рекомендуется.
+const lang = await App.storage.getValue('lang', 'en');   // симметрично set(): getValue === значение, переданное в set()
+
+// getRow(key) — явный алиас get(): запись целиком {name, value, alias, app_id, ...}
+const rec = await App.storage.getRow('lang');
+const meta = rec?.alias;   // используй когда нужны alias/метаданные
+```
+
 > ⚠️ **`get()` возвращает RECORD (объект), а не значение.** Типовая ошибка:
 >
 > ```js

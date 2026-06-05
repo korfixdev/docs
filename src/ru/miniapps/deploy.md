@@ -95,6 +95,29 @@ init();
 
 ### Шаг 6: Упаковать в zip
 
+> ✅ **Манифест валидируется на стороне сервера при деплое.** И `POST /api/db/marketplace/{id}`,
+> и `POST /api/marketplace/deploy/{id}` проверяют упакованный `config.json` и архив и возвращают
+> вердикт в ответе — читай его и исправляй, открывать приложение чтобы найти битый манифест больше
+> не нужно.
+>
+> **Ошибки блокируют деплой** (ответ `{"status":"error","message":"...список..."}`). Триггеры:
+> невалидный JSON; отсутствует `name`; отсутствует или не-объект `urls`; любой файл из `urls.*` или
+> `logo`, которого нет в zip. `message` перечисляет все проблемы сразу. Пример:
+> ```json
+> {"status":"error","message":"config.json: invalid JSON; field \"name\" is required; urls.widget -> widget.html not found in zip"}
+> ```
+>
+> **Предупреждения не блокируют** — деплой проходит, а в ответе будет `warnings`. Триггеры:
+> отсутствуют рекомендуемые поля: `package`, `permissions`, `about`. Пример:
+> ```json
+> {"status":"success","id":"123","alias":"abc...","warnings":["field \"package\" is recommended","field \"about\" is recommended"]}
+> ```
+>
+> Локальная проверка перед упаковкой всё ещё полезна как pre-flight:
+> ```bash
+> python3 -m json.tool config.json   # или: jq . config.json
+> ```
+
 ```bash
 # В директории приложения:
 zip -r /tmp/my-app.zip config.json widget.html *.js *.css *.svg
