@@ -430,22 +430,27 @@ await App.fetch(`/db/projects/${alias}?edit&ajax=1`, {
 
 ### Deleting
 
-Deletion is **not HTTP DELETE**. The record is marked `hidden=1` and moved to trash.
-From trash the user can permanently delete.
+All deletes are **soft** — the record is marked `hidden=1` and moved to trash, where the user can
+permanently delete it. There is no hard-delete via the API.
 
 ```js
-// Via /db/ — soft delete (to trash)
+// REST DELETE — /api/db/{catalog}/{id} (Bearer token or session)
+await App.fetch(`/api/db/projects/${id}`, { method: 'DELETE' });
+// → {"ok":true,"status":"success","id":"...","alias":"..."} (404 if not found, 400 without id)
+
+// /db/ session path (inside the iframe) — no DELETE verb here, use ?udel POST
 await App.fetch(`/db/projects/${alias}?udel&ajax=1`, { method: 'POST' });
 
-// Via /api/db/ — also soft delete (hidden=1)
-await App.fetch(`/api/db/projects/${id}`, {
-    method: 'POST',
-    body: { hidden: 1, submit: 1 }
-});
+// Equivalent on /api/db/ via POST + hidden (if you prefer an explicit field)
+await App.fetch(`/api/db/projects/${id}`, { method: 'POST', body: { hidden: 1, submit: 1 } });
 ```
 
-**Important**: `hidden` must be in the catalog schema. For custom catalogs (`custom_*`)
-the `hidden` field is present automatically.
+> **Verbs on `/api/db/`:** `GET` (read), `POST` (create/update), `PUT`/`PATCH` (upsert/update, same as
+> `POST`), `DELETE` (soft-delete by id). A token with the catalog's `_post` class may use all write verbs.
+> The `/db/` session endpoint only wires `GET`/`POST` (+`?udel`) — `DELETE` there does nothing.
+
+**Note**: the `hidden`-field approach needs `hidden` in the catalog schema. For custom catalogs (`custom_*`)
+it's present automatically; `DELETE /api/db/...` handles this for you.
 
 ### Custom catalogs (`custom_*`) — CRUD specifics
 

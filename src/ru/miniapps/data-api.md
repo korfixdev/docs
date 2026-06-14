@@ -432,22 +432,27 @@ await App.fetch(`/db/projects/${alias}?edit&ajax=1`, {
 
 ### Удаление
 
-Удаление — это **не HTTP DELETE**. Запись помечается `hidden=1` и попадает в корзину.
-Из корзины пользователь может удалить окончательно.
+Все удаления **мягкие** — запись помечается `hidden=1` и попадает в корзину, откуда пользователь
+может удалить окончательно. Жёсткого удаления через API нет.
 
 ```js
-// Через /db/ — мягкое удаление (в корзину)
+// REST DELETE — /api/db/{catalog}/{id} (Bearer-токен или сессия)
+await App.fetch(`/api/db/projects/${id}`, { method: 'DELETE' });
+// → {"ok":true,"status":"success","id":"...","alias":"..."} (404 если не найдено, 400 без id)
+
+// Путь /db/ (внутри iframe) — DELETE-глагола нет, используй ?udel POST
 await App.fetch(`/db/projects/${alias}?udel&ajax=1`, { method: 'POST' });
 
-// Через /api/db/ — тоже мягкое удаление (hidden=1)
-await App.fetch(`/api/db/projects/${id}`, {
-    method: 'POST',
-    body: { hidden: 1, submit: 1 }
-});
+// Эквивалент на /api/db/ через POST + hidden (если предпочитаешь явное поле)
+await App.fetch(`/api/db/projects/${id}`, { method: 'POST', body: { hidden: 1, submit: 1 } });
 ```
 
-**Важно**: `hidden` должно быть в схеме каталога. Для кастомных каталогов (`custom_*`)
-поле `hidden` присутствует автоматически.
+> **Глаголы на `/api/db/`:** `GET` (чтение), `POST` (create/update), `PUT`/`PATCH` (upsert/update, как
+> `POST`), `DELETE` (soft-delete по id). Токен с классом `_post` каталога может использовать все
+> write-глаголы. Сессионный `/db/` поддерживает только `GET`/`POST` (+`?udel`) — `DELETE` там ничего не делает.
+
+**Заметка**: подход через поле `hidden` требует `hidden` в схеме каталога. Для кастомных (`custom_*`)
+оно есть автоматически; `DELETE /api/db/...` делает это за тебя.
 
 ### Кастомные каталоги (`custom_*`) — особенности CRUD
 
