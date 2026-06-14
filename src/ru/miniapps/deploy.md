@@ -107,11 +107,14 @@ init();
 > {"status":"error","message":"config.json: invalid JSON; field \"name\" is required; urls.widget -> widget.html not found in zip"}
 > ```
 >
-> **Предупреждения не блокируют** — деплой проходит, а в ответе будет `warnings`. Триггеры:
-> отсутствуют рекомендуемые поля: `package`, `permissions`, `about`. Пример:
+> **Предупреждения не блокируют** — *сервер* принимает деплой с одним `name` и возвращает `warnings`
+> на отсутствующие поля вроде `package`, `permissions`, `about`. Пример:
 > ```json
 > {"status":"success","id":"123","alias":"abc...","warnings":["field \"package\" is recommended","field \"about\" is recommended"]}
 > ```
+> **Но локальный гейт строже:** `validate-bundle.js` / `korfix-pre-deploy` считают **все** поля метаданных
+> config.json обязательными (FAIL), поэтому ты исправишь их до упаковки и до этих серверных warnings
+> на практике не дойдёшь. Набор обязательных полей — в [config-json.md](config-json.md).
 >
 > Локальная проверка перед упаковкой всё ещё полезна как pre-flight:
 > ```bash

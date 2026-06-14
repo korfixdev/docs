@@ -150,8 +150,7 @@ async function installWidgetOnDashboard(appToken, widgetName) {
                 'form[width]': 6,
                 'form[board_id]': board.id,
                 'form[options]': JSON.stringify({ app_frame: appToken + ':widget' }),
-                'form[from_auth]': currentUserId,
-                'form[from_group]': currentUserId,
+                // from_group не передаём — сервер форсит; from_auth не передан → персонально (0 = общая для группы)
                 submit: 1
             }
         });

@@ -87,13 +87,8 @@ const FIELDS = [
     { name: 'Дедлайн',        dbname: 'due_date',   type: 'datetime' },
 ];
 
-// Получить ID текущего пользователя (для from_auth/from_group)
-let currentUserId = 0;
-async function loadUserId() {
-    const schema = await App.fetch('/db/custom_dbtables/sheme.json');
-    const arr = schema?.data?.from_auth?.arr || {};
-    currentUserId = Object.keys(arr).find(k => k !== '0') || 0;
-}
+// ID пользователя искать не нужно — при auth_role сервер сам ставит from_group/from_auth
+// при сохранении (не передавай их; form[from_auth]=0 — только если запись общая для группы).
 
 function uid() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
@@ -107,8 +102,7 @@ async function createTable() {
             'form[name]': 'Quick Notes',
             'form[dbname]': 'quicknotes',
             'form[scheme]': 'coredb_def_catalog',  // ОБЯЗАТЕЛЬНО: template-схема каталога
-            'form[from_auth]': currentUserId,
-            'form[from_group]': currentUserId,
+            // from_group не передаём — сервер форсит; from_auth не передан → персонально (0 = общая для группы)
             submit: 1
         }
     });
@@ -121,8 +115,7 @@ async function createField(field) {
         'form[dbname]': field.dbname,
         'form[type]': field.type,
         'form[scheme]': CATALOG,
-        'form[from_auth]': currentUserId,
-        'form[from_group]': currentUserId,
+        // from_group не передаём — сервер форсит; from_auth не передан → персонально (0 = общая для группы)
         submit: 1
     };
     if (field.f_maxlen) body['form[f_maxlen]'] = field.f_maxlen;

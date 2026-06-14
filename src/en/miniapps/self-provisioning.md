@@ -85,13 +85,8 @@ const FIELDS = [
     { name: 'Deadline',   dbname: 'due_date',   type: 'datetime' },
 ];
 
-// Get current user ID (for from_auth/from_group)
-let currentUserId = 0;
-async function loadUserId() {
-    const schema = await App.fetch('/db/custom_dbtables/sheme.json');
-    const arr = schema?.data?.from_auth?.arr || {};
-    currentUserId = Object.keys(arr).find(k => k !== '0') || 0;
-}
+// No need to look up the user id — with auth_role the server sets from_group/from_auth
+// on save (omit them; pass form[from_auth]=0 only if a record should be shared with the group).
 
 function uid() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
@@ -105,8 +100,7 @@ async function createTable() {
             'form[name]': 'Quick Notes',
             'form[dbname]': 'quicknotes',
             'form[scheme]': 'coredb_def_catalog',  // REQUIRED: catalog template schema
-            'form[from_auth]': currentUserId,
-            'form[from_group]': currentUserId,
+            // from_group omitted — server forces it; from_auth omitted → personal (pass 0 for group-shared)
             submit: 1
         }
     });
@@ -119,8 +113,7 @@ async function createField(field) {
         'form[dbname]': field.dbname,
         'form[type]': field.type,
         'form[scheme]': CATALOG,
-        'form[from_auth]': currentUserId,
-        'form[from_group]': currentUserId,
+        // from_group omitted — server forces it; from_auth omitted → personal (pass 0 for group-shared)
         submit: 1
     };
     if (field.f_maxlen) body['form[f_maxlen]'] = field.f_maxlen;

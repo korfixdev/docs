@@ -388,10 +388,12 @@ const fromAuthArr = schema?.data?.from_auth?.arr || {};
 const currentUserId = Object.keys(fromAuthArr).find(k => k !== '0') || 0;
 ```
 
-4. **Example: bulk creation with correct ownership:**
+4. **Example: bulk creation with explicit ownership.** Only needed when you must set the owner
+   yourself — e.g. running as an admin who wants *personal* records (an admin who omits `from_auth`
+   gets public `0`, per point 2). A non-admin can skip all of this — the server sets `from_auth` to them.
 
 ```js
-// Determine current user ID
+// Determine current user ID (from the schema's from_auth.arr — {0:'All', USER_ID:'Personal'})
 const schema = await App.fetch('/db/my_catalog/sheme.json');
 const arr = schema?.data?.from_auth?.arr || {};
 const userId = Object.keys(arr).find(k => k !== '0') || 0;
@@ -403,8 +405,7 @@ for (const item of items) {
         body: {
             'form[alias]': alias,
             'form[name]': item.name,
-            'form[from_auth]': userId,
-            'form[from_group]': userId,
+            'form[from_auth]': userId,   // explicit personal owner; use 0 for group-shared. from_group: omit (server forces it)
             submit: 1
         }
     });
@@ -458,8 +459,7 @@ await App.fetch(`/api/db/custom_my_catalog`, {
     body: {
         alias: uid(),                    // no form[]
         custom_name: 'Name',
-        from_auth: currentUserId,
-        from_group: currentUserId,
+        // from_group omitted — server forces it; from_auth omitted → personal (pass 0 for group-shared)
         submit: 1
     }
 });
@@ -488,20 +488,31 @@ await App.fetch(`/api/db/custom_my_catalog/${id}`, {
 > **Addressing in `/api/db/`**: POST updates work by `/{id}` (numeric identifier).
 > By alias for custom catalogs, POST may return `item not found`.
 
-### `from_auth` and `from_group` — required
+### Record ownership — `from_group` / `from_auth`
 
-When creating records **always** pass `from_auth` and `from_group`:
+With `FEATURES_USED.auth_role` (the case on Korfix instances) the platform sets ownership server-side
+in `kat_admin.php` → `KAT::save`, so you usually **pass nothing**:
+
+- **`from_group`** — don't pass it. The server forces it to your session group; a non-admin can't set
+  another group, and it can't be empty. Only an admin passes it to deliberately transfer a record.
+- **`from_auth`** — controls personal vs group ownership, per your app logic:
 
 ```js
 body: {
-    from_auth: currentUserId,   // record owner
-    from_group: currentUserId,  // group
+    // from_auth omitted → server assigns the owner (non-admin → personal; an admin gets the
+    //                      schema's select default — see the "from_auth defaults" points above)
+    // 'form[from_auth]': 0,          // → shared with the WHOLE group (everyone in the group sees it)
+    // 'form[from_auth]': someUserId, // → assign to a specific user
     submit: 1
 }
 ```
 
-Records with empty `from_auth`/`from_group` belong to the super-admin, are visible to all accounts
-and are **unmanageable** — they can't be edited or deleted through the platform UI.
+`from_auth=0` ("shared for the group") is allowed for every catalog **except `access_db`** (there
+visibility is encoded in `acctype_*` columns, so a `0` owner does nothing).
+
+> On a legacy instance **without** `auth_role` there is no server-side enforcement — there a record
+> with empty `from_auth`/`from_group` falls to the super-admin and becomes unmanageable. On Korfix the
+> server fills them as described above.
 
 ### Getting the catalog schema
 

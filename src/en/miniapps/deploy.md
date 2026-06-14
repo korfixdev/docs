@@ -107,11 +107,14 @@ Before packaging, go through [checklist.md](checklist.md). Pay special attention
 > {"status":"error","message":"config.json: invalid JSON; field \"name\" is required; urls.widget -> widget.html not found in zip"}
 > ```
 >
-> **Warnings don't block** — the deploy succeeds and the response carries `warnings`. Triggered by
-> missing recommended fields: `package`, `permissions`, `about`. Example:
+> **Warnings don't block** — the *server* accepts a deploy with only `name` and returns `warnings` for
+> missing fields like `package`, `permissions`, `about`. Example:
 > ```json
 > {"status":"success","id":"123","alias":"abc...","warnings":["field \"package\" is recommended","field \"about\" is recommended"]}
 > ```
+> **But the local gate is stricter:** `validate-bundle.js` / `korfix-pre-deploy` treat **every** config.json
+> metadata field as required (FAIL), so you fix these before zipping and never actually hit these server
+> warnings. See the required-field set in [config-json.md](config-json.md).
 >
 > Still worth a local pre-flight before zipping:
 > ```bash

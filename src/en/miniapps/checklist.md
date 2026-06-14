@@ -11,7 +11,7 @@ Check all items before publishing the app to the marketplace.
 
 - [ ] Valid JSON — the manifest is validated server-side on deploy (config.json + archive). Fix whatever the deploy response reports: `errors` block the deploy (`{"status":"error","message":"..."}`), `warnings` (`"warnings":[...]`) succeed but should still be addressed. Pre-flight locally before zipping: `python3 -m json.tool config.json` / `jq . config.json`
 - [ ] `name` field — app name
-- [ ] `package` field — package name (app folder name) — recommended; missing → deploy warning
+- [ ] `package` field — package name (app folder name) — **required** (single source of truth: every config.json metadata field is required — same set as `validate-bundle.js`, `config-json.md`, `schemas/config.schema.json`)
 - [ ] `category` field — integer id `1..5` (`1` AI-agents, `2` Business, `3` Games, `4` Tools, `5` Other). The platform writes it to the DB on first install if still empty
 - [ ] `description` field — short description (1-2 sentences)
 - [ ] `about` field — detailed description with all sections (What it does, Where it appears, Features, How to use, Setup)
@@ -81,7 +81,12 @@ Full pattern → [frames.md](frames.md)
     - Collaborative (all see all) → `configureAccess(catalog, 1)`
     - Admin-only → keep default, explicitly mention in `about`
     - The `configureAccess` helper in the `korfix-self-provisioning` skill — fetches the actual acctype_* list from the instance schema (don't hardcode)
-- [ ] For bulk record creation — explicitly generate `form[alias]`. `form[from_auth]`/`form[from_group]` are **not required** to pass — the server (with `FEATURES_USED.auth_role`) fills them from session/token automatically; only pass when an admin explicitly transfers a record to another group or assigns an owner
+- [ ] For bulk record creation — explicitly generate `form[alias]`. `from_group`/`from_auth` ownership (with `FEATURES_USED.auth_role`, enforced in `kat_admin.php` → `KAT::save`):
+    - **`from_group`** — don't pass it: the server forces it to your session group (non-admin can't leave their group; can't be empty). Only an admin passes it to deliberately transfer a record to another group.
+    - **`from_auth`** — controls personal vs group ownership per your app logic:
+        - **omit** → defaults to the current user (personal record, owned by the creator)
+        - **`form[from_auth]=0`** → record is **shared with the whole group** (everyone in the group sees it). Allowed for all catalogs **except `access_db`**.
+        - **`form[from_auth]=<userId>`** → assign to a specific user.
 
 ## After installation
 

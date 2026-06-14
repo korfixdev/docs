@@ -86,8 +86,7 @@ await App.fetch('/db/custom_dbview/add?edit&ajax=1', {
         'form[catalog1_field]': 'client_id',
         'form[catalog2]': 'b2b_clients',
         'form[catalog2_field]': 'id',
-        'form[from_auth]': currentUserId,
-        'form[from_group]': currentUserId,
+        // from_group не передаём — сервер форсит; from_auth не передан → персонально (0 = общая для группы)
         submit: 1
     }
 });
@@ -200,8 +199,7 @@ if (!exists) {
             'form[catalog1_field]': 'client_id',
             'form[catalog2]': 'ag_clients',
             'form[catalog2_field]': 'id',
-            'form[from_auth]': currentUserId,
-            'form[from_group]': currentUserId,
+            // from_group не передаём — сервер форсит; from_auth не передан → персонально (0 = общая для группы)
             submit: 1
         }
     });

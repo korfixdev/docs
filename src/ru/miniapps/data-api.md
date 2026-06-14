@@ -390,10 +390,12 @@ const fromAuthArr = schema?.data?.from_auth?.arr || {};
 const currentUserId = Object.keys(fromAuthArr).find(k => k !== '0') || 0;
 ```
 
-4. **Пример: массовое создание с корректной принадлежностью:**
+4. **Пример: массовое создание с явной принадлежностью.** Нужно только когда владельца задаёшь
+   сам — например, под админом, которому нужны *персональные* записи (админ без `from_auth` получит
+   публичный `0`, см. п.2). Non-admin может всё это пропустить — сервер проставит `from_auth` на него.
 
 ```js
-// Определяем ID текущего пользователя
+// Определяем ID текущего пользователя (из from_auth.arr схемы — {0:'Всем', USER_ID:'Персональный'})
 const schema = await App.fetch('/db/my_catalog/sheme.json');
 const arr = schema?.data?.from_auth?.arr || {};
 const userId = Object.keys(arr).find(k => k !== '0') || 0;
@@ -405,8 +407,7 @@ for (const item of items) {
         body: {
             'form[alias]': alias,
             'form[name]': item.name,
-            'form[from_auth]': userId,
-            'form[from_group]': userId,
+            'form[from_auth]': userId,   // явный персональный владелец; 0 = общая для группы. from_group: не передаём (сервер форсит)
             submit: 1
         }
     });
@@ -460,8 +461,7 @@ await App.fetch(`/api/db/custom_my_catalog`, {
     body: {
         alias: uid(),                    // без form[]
         custom_name: 'Название',
-        from_auth: currentUserId,
-        from_group: currentUserId,
+        // from_group не передаём — сервер форсит; from_auth не передан → персонально (0 = общая для группы)
         submit: 1
     }
 });
@@ -490,20 +490,31 @@ await App.fetch(`/api/db/custom_my_catalog/${id}`, {
 > **Адресация в `/api/db/`**: POST-обновление работает по `/{id}` (числовой идентификатор).
 > По alias для кастомных каталогов POST может вернуть `item not found`.
 
-### `from_auth` и `from_group` — обязательны
+### Владелец записи — `from_group` / `from_auth`
 
-При создании записей **всегда** передавайте `from_auth` и `from_group`:
+При `FEATURES_USED.auth_role` (так на инстансах Korfix) платформа проставляет владельца на сервере
+в `kat_admin.php` → `KAT::save`, поэтому обычно **передавать ничего не нужно**:
+
+- **`from_group`** — не передавай. Сервер форсит его на твою группу из сессии; non-admin не может
+  выставить чужую группу, и пустым быть не может. Передаёт только админ — для осознанного трансфера.
+- **`from_auth`** — управляет «персонально vs группе», по логике приложения:
 
 ```js
 body: {
-    from_auth: currentUserId,   // владелец записи
-    from_group: currentUserId,  // группа
+    // from_auth не передан → сервер сам назначает владельца (non-admin → персонально; у админа —
+    //                        select-дефолт из схемы, см. пункты про «from_auth defaults» выше)
+    // 'form[from_auth]': 0,          // → общая для ВСЕЙ группы (видят все в группе)
+    // 'form[from_auth]': someUserId, // → назначить конкретному пользователю
     submit: 1
 }
 ```
 
-Записи с пустыми `from_auth`/`from_group` принадлежат суперадмину, видны всем аккаунтам
-и **неуправляемы** — их нельзя редактировать или удалять через интерфейс платформы.
+`from_auth=0` («общая для группы») разрешён для всех каталогов **кроме `access_db`** (там видимость
+кодируется колонками `acctype_*`, поэтому владелец `0` ничего не даёт).
+
+> На легаси-инстансе **без** `auth_role` серверного форса нет — там запись с пустыми
+> `from_auth`/`from_group` уходит суперадмину и становится неуправляемой. На Korfix сервер заполняет
+> их как описано выше.
 
 ### Получение схемы каталога
 
