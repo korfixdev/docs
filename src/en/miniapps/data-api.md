@@ -185,6 +185,31 @@ const resp = await appFetch('/db/custom_dbtables/add?edit&ajax=1', {
 
 ---
 
+### HTTP status codes for `/api/db/` write endpoints
+
+`POST /api/db/{catalog}` and `POST /api/db/{catalog}/{id}` return correct HTTP codes:
+
+| Scenario | HTTP code | `ok` |
+|----------|-----------|------|
+| Record created successfully | **201 Created** | `true` |
+| Record updated successfully | **200 OK** | `true` |
+| Validation error (missing required field, etc.) | **422 Unprocessable** | `false` |
+| Record not found (update by non-existent id) | **404 Not Found** | `false` |
+| Server error | **500** | `false` |
+
+All responses include `ok: boolean` in the body:
+
+```json
+{ "ok": true, "status": "success", "id": "123", "alias": "abc" }
+{ "ok": false, "status": "error", "message": "field_empty: name" }
+```
+
+> **`/db/` session endpoints are unchanged** — they still return HTTP 200 with `status: 'error'` in the body for backward compatibility with the UI layer.
+
+For new miniapp code, use `App.fetchV2()` — it reads the `ok` field and normalizes the response shape for you.
+
+---
+
 ## Working with catalog data
 
 ### Reading a list

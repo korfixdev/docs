@@ -29,6 +29,7 @@ const App = new VMCRMUserApp();
 | `App.getLocation()` | Promise -> `{data: '/db/projects'}` | URL родительского окна |
 | `App.fetch(url, options?)` | Promise -> response | HTTP-запрос от имени пользователя. Дедупликация параллельных запросов с одинаковым URL |
 | `App.fetchAll(url, options?)` | Promise -> response | fetch + автосклейка всех страниц пагинации |
+| `App.fetchV2(url, options?)` | Promise -> `{ok, status, data, error?, total?}` | Как `fetch()`, но всегда возвращает одинаковую форму ответа независимо от контекста (iframe или root window). Рекомендуется для нового кода. |
 | `App.prefetch(url)` | void | Запустить фетч в фоне заранее. Когда `App.fetch(url)` вызовется позже — вернёт готовые данные мгновенно |
 | `App.done()` | Promise | Сигнал "установка завершена" из install-фрейма. Setup-экран платформы немедленно переходит к следующему приложению |
 | `App.navigate(url)` | void | SPA-переход родительского окна (без перезагрузки) |
@@ -317,6 +318,28 @@ App.fetchAll('/db/projects.json').then(resp => {
   // resp.data -- все элементы, без пагинации
 });
 ```
+
+#### fetchV2(url, options?)
+
+Возвращает `Promise<{ok, status, data, error?, total?}>` с единообразной формой ответа независимо от того, запущен ли миниап в iframe или напрямую.
+
+```js
+// Работает одинаково в iframe и root window
+const result = await App.fetchV2('/api/db/projects?limit=20');
+if (!result.ok) {
+    console.error(result.error.message);
+    return;
+}
+const items = result.data; // всегда массив — без двойного разворачивания
+console.log(`Загружено ${result.total} записей`);
+```
+
+**Отличие от `fetch()`:**
+- `App.fetch()` в iframe возвращает `{data: serverPayload, requestId}` — для массива нужен `result.data.data`
+- `App.fetch()` в root window возвращает `serverPayload` — для массива нужен `result.data`
+- `App.fetchV2()` всегда возвращает `{ok, status, data}` — всегда используй `result.data`
+
+Используй `fetchV2()` во всём новом коде миниапов. `fetch()` — только когда нужен доступ к сырому ответу сервера.
 
 #### modal(content, options?)
 

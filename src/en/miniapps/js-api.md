@@ -29,6 +29,7 @@ const App = new VMCRMUserApp();
 | `App.getLocation()` | Promise -> `{data: '/db/projects'}` | URL родительского окна |
 | `App.fetch(url, options?)` | Promise -> response | HTTP-запрос от имени пользователя. Дедупликация параллельных запросов с одинаковым URL |
 | `App.fetchAll(url, options?)` | Promise -> response | fetch + автосклейка всех страниц пагинации |
+| `App.fetchV2(url, options?)` | Promise -> `{ok, status, data, error?, total?}` | Like `fetch()` but always returns the same shape regardless of context (iframe or root window). Recommended for new code. |
 | `App.prefetch(url)` | void | Запустить фетч в фоне заранее. Когда `App.fetch(url)` вызовется позже — вернёт готовые данные мгновенно |
 | `App.done()` | Promise | Сигнал "установка завершена" из install-фрейма. Setup-экран платформы немедленно переходит к следующему приложению |
 | `App.navigate(url)` | void | SPA-переход родительского окна (без перезагрузки) |
@@ -317,6 +318,28 @@ App.fetchAll('/db/projects.json').then(resp => {
   // resp.data -- все элементы, без пагинации
 });
 ```
+
+#### fetchV2(url, options?)
+
+Returns `Promise<{ok, status, data, error?, total?}>` with a consistent shape regardless of whether the miniapp is in an iframe or the root window.
+
+```js
+// Works identically in iframe and root window
+const result = await App.fetchV2('/api/db/projects?limit=20');
+if (!result.ok) {
+    console.error(result.error.message);
+    return;
+}
+const items = result.data; // always the payload — no double unwrapping
+console.log(`Loaded ${result.total} items`);
+```
+
+**vs old `fetch()`:**
+- `App.fetch()` in an iframe resolves to `{data: serverPayload, requestId}` — you need `result.data.data` for the array
+- `App.fetch()` in root window resolves to `serverPayload` — you need `result.data` for the array
+- `App.fetchV2()` always resolves to `{ok, status, data}` — always use `result.data`
+
+Use `fetchV2()` for all new miniapp code. Use `fetch()` only if you need low-level access to the raw server response.
 
 #### modal(content, options?)
 
