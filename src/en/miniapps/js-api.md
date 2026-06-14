@@ -105,9 +105,11 @@ _pollSnap = { total: records.length, topIds: records.slice(0,5).map(r=>r.id).joi
 // Polling
 setInterval(async () => {
     try {
-        const r = await App.fetch('/db/MY_CATALOG.json?limit=5&order=ts_desc&not_cache=1');
-        const rows = Array.isArray(r?.data) ? r.data : (r?.data?.data ?? []);
-        const total = Number(r?.total ?? rows.length);
+        // free_cache=1 — ignore the user's session-saved filters (a programmatic poll must
+        // see the full catalog, not whatever the user last filtered); not_cache=1 — don't pollute cache.
+        const r = await App.fetchV2('/db/MY_CATALOG.json?limit=5&order=ts_desc&free_cache=1&not_cache=1');
+        const rows = r.data ?? [];
+        const total = Number(r.total ?? rows.length);
         const topIds = rows.map(r => r.id).join(',');
         if (_pollSnap.total >= 0 && (total !== _pollSnap.total || topIds !== _pollSnap.topIds)) {
             loadRecords();

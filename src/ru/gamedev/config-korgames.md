@@ -146,6 +146,8 @@ const r = await App.fetch('/db/marketplace.json?form[package]=game-%&limit=50');
 5. Доп. квесты: `deploy_app` +1 (автору) и `install_app` +1 (установившему, если отличается).
 
 > Важно: **appconfig в marketplace должен быть наполнен до установки.** Если деплоил через `POST /api/db/marketplace/{id}` — запиши ещё и `POST /api/marketplace/refresh/{id}`, иначе хук логирует warning «appconfig empty» и игру не регистрирует. Правильный быстрый путь — сразу `POST /api/marketplace/deploy/{id}` (= update + refresh).
+>
+> Именно поэтому **игры по умолчанию используют `/api/marketplace/deploy/{id}`**, а обычные миниапы — `/api/db/marketplace/{id}`: korgames-хуку нужен наполненный appconfig на каждом деплое. Общая таблица решений по деплою — в [miniapps/deploy.md](../miniapps/deploy.md).
 
 ---
 

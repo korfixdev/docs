@@ -126,17 +126,29 @@
 
 ## Работа с API
 
+> **Чтение данных.** Для одиночного запроса используй `App.fetchV2()` — он возвращает `{ok, status, data, total}`,
+> где `data` всегда полезная нагрузка (без распаковки `resp.data.data`). Для постраничного чтения у `App.fetchAll()`
+> пока нет V2-варианта, поэтому нормализуй его легаси-форму через хелпер `asArray`:
+> ```js
+> function asArray(resp) {
+>     if (Array.isArray(resp?.data)) return resp.data;
+>     if (Array.isArray(resp?.data?.data)) return resp.data.data;
+>     return [];
+> }
+> ```
+
 ### Получить список дашбордов
 
 ```js
 // Рекомендуется /api/db/ — возвращает полный список без серверных фильтров каталога
-const boards = asArray(await App.fetch('/api/db/dashboards?limit=999'));
+const boards = (await App.fetchV2('/api/db/dashboards?limit=999')).data ?? [];
 // [{id, alias, name, prior, from_auth, from_group}, ...]
 ```
 
 ### Получить виджеты дашборда
 
 ```js
+// fetchAll (постраничный) сохраняет легаси-форму — нормализуй через asArray (определён выше)
 const widgets = asArray(await App.fetchAll('/db/dashboard_widgets.json?form[board_id]=' + boardId));
 // [{id, alias, name, type, width, options, board_id, prior}, ...]
 ```

@@ -9,16 +9,17 @@ All requests — via `App.fetch` (not `window.fetch` — CORS). Authorization vi
 
 ## Required Wrapper
 
-`App.fetch` returns `{data: serverResponse, requestId}` — needs unpacking. This is a feature of the postMessage transport (see also [miniapps/data-api.md](../miniapps/data-api.md) § API responses):
+Use `App.fetchV2()` — it returns a uniform `{ok, status, data, total}` shape from both the iframe and
+the root window (the legacy `App.fetch()` returned `{data: serverResponse, requestId}` inside the iframe,
+which needed manual unpacking). See also [miniapps/data-api.md](../miniapps/data-api.md) § Response normalization.
 
 ```js
 async function kg(url, ...rest) {
-    const r = await App.fetch(url, ...rest);
-    return r?.data ?? r;   // r.data contains what the server returned
+    return App.fetchV2(url, ...rest);   // {ok, status, data, total} — read .data for the payload
 }
 ```
 
-All examples below use `kg(...)`.
+All examples below use `kg(...)` and read `.data` for the payload, `.ok` for success.
 
 ---
 

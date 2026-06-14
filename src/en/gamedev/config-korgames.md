@@ -146,6 +146,8 @@ Future fields (in roadmap):
 5. Additional quests: `deploy_app` +1 (for author) and `install_app` +1 (for installer, if different).
 
 > Important: **appconfig in marketplace must be populated before install.** If you deployed via `POST /api/db/marketplace/{id}` — also call `POST /api/marketplace/refresh/{id}`, otherwise the hook logs a warning "appconfig empty" and doesn't register the game. The correct fast path — use `POST /api/marketplace/deploy/{id}` directly (= update + refresh).
+>
+> This is why **games default to `/api/marketplace/deploy/{id}`** while regular miniapps default to `/api/db/marketplace/{id}` — the korgames hook needs a populated appconfig on every deploy. See [miniapps/deploy.md](../miniapps/deploy.md) for the general deploy decision table.
 
 ---
 

@@ -9,12 +9,13 @@
 
 ## Обязательная обёртка
 
-`App.fetch` возвращает `{data: serverResponse, requestId}` — нужно распаковывать. Это особенность postMessage-транспорта (см. также [miniapps/data-api.md](../miniapps/data-api.md) § ответы API):
+Используй `App.fetchV2()` — он возвращает единообразную форму `{ok, status, data, total}` и из iframe,
+и из корневого окна (старый `App.fetch()` внутри iframe возвращал `{data: serverResponse, requestId}`,
+что требовало ручной распаковки). См. также [miniapps/data-api.md](../miniapps/data-api.md) § нормализация ответа.
 
 ```js
 async function kg(url, ...rest) {
-    const r = await App.fetch(url, ...rest);
-    return r?.data ?? r;   // в r.data лежит то, что вернул сервер
+    return App.fetchV2(url, ...rest);   // {ok, status, data, total} — читай .data для полезной нагрузки
 }
 ```
 

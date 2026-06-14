@@ -126,17 +126,29 @@ The frame receives standard parameters via VMCRMUserApp with `catalog = "dashboa
 
 ## Working with the API
 
+> **Reading data.** For a single request use `App.fetchV2()` — it returns `{ok, status, data, total}`
+> with `data` always the payload (no `resp.data.data` unwrapping). For paginated reads `App.fetchAll()`
+> has no V2 variant yet, so normalize its legacy shape with the `asArray` helper:
+> ```js
+> function asArray(resp) {
+>     if (Array.isArray(resp?.data)) return resp.data;
+>     if (Array.isArray(resp?.data?.data)) return resp.data.data;
+>     return [];
+> }
+> ```
+
 ### Get dashboard list
 
 ```js
 // Recommended /api/db/ — returns full list without server catalog filters
-const boards = asArray(await App.fetch('/api/db/dashboards?limit=999'));
+const boards = (await App.fetchV2('/api/db/dashboards?limit=999')).data ?? [];
 // [{id, alias, name, prior, from_auth, from_group}, ...]
 ```
 
 ### Get dashboard widgets
 
 ```js
+// fetchAll (paginated) keeps the legacy shape — normalize with asArray (defined above)
 const widgets = asArray(await App.fetchAll('/db/dashboard_widgets.json?form[board_id]=' + boardId));
 // [{id, alias, name, type, width, options, board_id, prior}, ...]
 ```

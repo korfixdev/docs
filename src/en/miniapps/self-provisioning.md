@@ -21,7 +21,7 @@ For Bearer token access (scripts, CI, external agents) the token needs these cla
 | `db_access_db_get` | Read the auto-created permissions record (for subsequent update) |
 | `db_access_db_post` | Update permissions for roles (`configureAccess` helper) |
 
-If any class is missing — self-provisioning will fail with 403 on the first request. Developer agents should run [`korfix-token-audit`](../../devkit-skills/korfix-token-audit/) before starting to avoid hitting this mid-process.
+If any class is missing — self-provisioning will fail with 403 on the first request. Developer agents should run the `korfix-token-audit` skill before starting to avoid hitting this mid-process.
 
 ---
 
@@ -44,8 +44,11 @@ const CATALOG = 'custom_quicknotes';
 async function checkCatalogExists() {
     try {
         // dbname = table name without custom_ prefix (quicknotes, not custom_quicknotes)
-        const resp = await App.fetch('/db/custom_dbtables.json?form[dbname]=quicknotes');
-        return !!(resp && resp.data && Array.isArray(resp.data) && resp.data.length > 0);
+        // fetchV2: resp.data is the array in both iframe and root window. With the old
+        // App.fetch(), resp.data is the wrapper object inside the iframe → Array.isArray
+        // is false → the check wrongly reports "not exists" and re-provisions every load.
+        const resp = await App.fetchV2('/db/custom_dbtables.json?form[dbname]=quicknotes');
+        return Array.isArray(resp.data) && resp.data.length > 0;
     } catch (e) {}
     return false;
 }
@@ -57,8 +60,9 @@ For apps with multiple catalogs — a universal function:
 async function checkCatalogExists(catalogName) {
     try {
         const tablename = catalogName.replace('custom_', '');
-        const resp = await App.fetch('/db/custom_dbtables.json?form[dbname]=' + tablename);
-        return !!(resp && resp.data && Array.isArray(resp.data) && resp.data.length > 0);
+        // fetchV2 → resp.data is the array in every context (see note above).
+        const resp = await App.fetchV2('/db/custom_dbtables.json?form[dbname]=' + tablename);
+        return Array.isArray(resp.data) && resp.data.length > 0;
     } catch (e) {}
     return false;
 }

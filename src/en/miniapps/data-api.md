@@ -215,16 +215,20 @@ For new miniapp code, use `App.fetchV2()` — it reads the `ok` field and normal
 ### Reading a list
 
 ```js
-const resp = await App.fetch('/db/projects.json');
-// resp.data — array of items
-// resp.total — total count
+const resp = await App.fetchV2('/db/projects.json');
+const items = resp.data ?? [];   // always the array — same shape from iframe and root window
+const total = resp.total;        // total count
 
 // With a filter
-const resp = await App.fetch('/db/projects.json?form[status]=active');
+const resp = await App.fetchV2('/db/projects.json?form[status]=active');
 
-// All pages at once
+// All pages at once (fetchAll keeps the legacy shape — normalize with asArray, see below)
 const all = await App.fetchAll('/db/projects.json');
 ```
+
+> `fetchV2()` is recommended for new code: uniform `{ok, status, data, error?, total?}` from any context.
+> The plain `fetch()`/`fetchAll()` examples below still work but need `asArray` normalization
+> (see the "Response normalization" subsection).
 
 > **`.json` vs `/api/db/` — filters and session cache.**
 >
@@ -277,22 +281,30 @@ const all = await App.fetchAll('/db/projects.json');
 > const resp = await App.fetch('/api/db/dashboards?limit=999');
 > ```
 
-**Important: response normalization.** `resp.data` is not always an array — it can be
-an object (single record), `null`, or nested `resp.data.data`
-(when proxied through `App.fetch`). **Always** normalize to array:
+**Response normalization — use `App.fetchV2()`.** It returns the same `{ok, status, data, error?, total?}`
+shape from both the iframe and the root window, so `resp.data` is always the payload — no double
+unwrapping:
 
 ```js
-// Safe array extraction
-function asArray(resp) {
-    if (Array.isArray(resp?.data)) return resp.data;
-    if (Array.isArray(resp?.data?.data)) return resp.data.data;
-    return [];
-}
-
-const projects = asArray(await App.fetchAll('/db/tt_projects.json'));
-const tasks    = asArray(await App.fetchAll('/db/tt_tasks.json'));
-// Now .sort(), .filter(), .map() are safe
+const resp = await App.fetchV2('/db/tt_projects.json');
+const projects = resp.data ?? [];
+// resp.ok — false on error, resp.error.message — the reason
 ```
+
+> **Legacy `App.fetch()` workaround.** With the older `App.fetch()`, `resp.data` is the payload in the
+> root window but `resp.data.data` inside the iframe (postMessage wrapping). If you must use `fetch()`,
+> normalize with `asArray`:
+>
+> ```js
+> function asArray(resp) {
+>     if (Array.isArray(resp?.data)) return resp.data;
+>     if (Array.isArray(resp?.data?.data)) return resp.data.data;
+>     return [];
+> }
+> const tasks = asArray(await App.fetchAll('/db/tt_tasks.json'));
+> ```
+>
+> Prefer `fetchV2()` in new code — `asArray` is only needed for the legacy shape.
 
 ### Reading a single item
 

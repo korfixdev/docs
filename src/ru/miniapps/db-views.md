@@ -6,6 +6,17 @@
 Объединение двух каталогов в одно представление через MySQL VIEW + LEFT JOIN.
 Результат работает как обычный каталог — с фильтрацией, API, виджетами.
 
+> **Чтение данных.** Одиночный запрос → `App.fetchV2()` (`(await App.fetchV2(url)).data ?? []`). Постраничное
+> чтение использует `App.fetchAll()`, у которого нет V2-варианта — нормализуй его легаси-форму через `asArray`:
+> ```js
+> function asArray(resp) {
+>     if (Array.isArray(resp?.data)) return resp.data;
+>     if (Array.isArray(resp?.data?.data)) return resp.data.data;
+>     return [];
+> }
+> ```
+> Сниппеты `asArray(await App.fetchAll(...))` ниже предполагают, что этот хелпер определён.
+
 ---
 
 ## Когда использовать

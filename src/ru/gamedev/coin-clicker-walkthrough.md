@@ -301,7 +301,7 @@ curl -X POST "https://vibe.korfix.app/api/marketplace/deploy/109" \
 curl -X POST "https://vibe.korfix.app/api/db/marketplace" \
   -H "Authorization: Bearer $KORFIX_TOKEN" \
   -F 'name=Coin Clicker' \
-  -F 'category=games' \
+  -F 'category=3' \
   -F "doc1=@/tmp/coin-clicker.zip;type=application/zip"
 # → {"status":"success","id":"N","alias":"..."}
 # Сохранить N, дальше использовать /api/marketplace/deploy/N

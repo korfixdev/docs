@@ -89,18 +89,23 @@ All supported fields with comments. In a real app use only what you need.
 
 ### Top-level fields reference
 
+> All metadata fields below marked **yes** are required. The local pre-deploy gate
+> (`validate-bundle.js`), the `korfix-miniapp-validate` skill, and `schemas/config.schema.json`
+> all enforce the same set — a bundle that passes one passes the others.
+
 | Field | Required | Description |
 |-------|----------|-------------|
 | `name` | yes | App name. Appears on the marketplace card |
 | `version` | yes | Version (SemVer). Shown on the card |
 | `description` | yes | Short description (1-2 sentences). Goes into `anons` |
 | `about` | yes | Detailed markdown description. 5 sections: What it does / Where it appears in CRM / Features / How to use / Setup. All markdown in one string via `\n` |
-| `package` | recommended | Package name (app folder name). Unique identifier |
-| `tags` | recommended | Comma-separated tags. Used for filtering in the marketplace |
-| `logo` | recommended | Logo filename from the zip. SVG preferred |
+| `package` | yes | Package name (app folder name). Unique identifier |
+| `category` | yes | Marketplace category, integer 1..5: 1 AI-agents, 2 Business, 3 Games, 4 Tools, 5 Other |
+| `logo` | yes | Logo filename from the zip. SVG preferred |
 | `urls` | yes | Frame dictionary. Key → path. For local — relative, for remote — absolute. **`urls.main` is required if the app should open from the menu or the Install button** |
+| `permissions` | yes | Access rights declaration (see below) |
+| `tags` | optional | Comma-separated tags. Used for filtering in the marketplace |
 | `urlsConf` | optional | Parameters for `urls`: `method` (`get` for local, `post` by default) |
-| `permissions` | recommended | Access rights declaration (see below) |
 | `menu` | optional | Main menu items (see below) |
 | `catalogs` | optional | Entry points per catalog (see below) |
 

@@ -3,7 +3,7 @@
 Documentation for developing marketplace applications (miniapps) for the Korfix / VMCRM platform.
 
 > **Start here:** [rules.md](rules.md) — sandbox rules, restrictions, principles. **Read before starting.**
-> Server architecture, core hooks, infrastructure — in [../backend/index.md](../backend/index.md)
+> Miniapp PHP backends, server-side hooks — in [backend-development.md](backend-development.md)
 
 ---
 

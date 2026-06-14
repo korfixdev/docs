@@ -10,10 +10,12 @@ import VMCRMUserApp from '/templates/def/db/marketplace/vmcrm-user-app.js';
 window.App = new VMCRMUserApp();
 await App.getRequestParams();  // required BEFORE storage ops / i18n
 
-// Helper — unpack postMessage wrapper
+// Helper — uniform response shape (no postMessage double-unwrap).
+// App.fetchV2() yields {ok, status, data, total} identically from iframe and root window,
+// so callers always read `.data` (the payload) and `.ok` (success flag). This replaces the
+// old App.fetch()+`r?.data ?? r` trick that returned different shapes per context.
 async function kg(url, ...rest) {
-    const r = await App.fetch(url, ...rest);
-    return r?.data ?? r;
+    return App.fetchV2(url, ...rest);
 }
 function absUrl(path) {
     if (!path || /^https?:\/\//i.test(path)) return path;

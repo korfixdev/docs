@@ -301,7 +301,7 @@ Deploying a new app (when there's no id yet):
 curl -X POST "https://vibe.korfix.app/api/db/marketplace" \
   -H "Authorization: Bearer $KORFIX_TOKEN" \
   -F 'name=Coin Clicker' \
-  -F 'category=games' \
+  -F 'category=3' \
   -F "doc1=@/tmp/coin-clicker.zip;type=application/zip"
 # → {"status":"success","id":"N","alias":"..."}
 # Save N, use /api/marketplace/deploy/N from now on

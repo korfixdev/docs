@@ -10,10 +10,12 @@ import VMCRMUserApp from '/templates/def/db/marketplace/vmcrm-user-app.js';
 window.App = new VMCRMUserApp();
 await App.getRequestParams();  // обязательно ДО storage ops / i18n
 
-// Хелпер — распаковка postMessage-обёртки
+// Хелпер — единообразная форма ответа (без двойной распаковки postMessage).
+// App.fetchV2() возвращает {ok, status, data, total} одинаково из iframe и из корневого окна,
+// поэтому вызывающий код всегда читает `.data` (полезная нагрузка) и `.ok` (флаг успеха). Это
+// заменяет старый трюк App.fetch()+`r?.data ?? r`, который возвращал разную форму в разных контекстах.
 async function kg(url, ...rest) {
-    const r = await App.fetch(url, ...rest);
-    return r?.data ?? r;
+    return App.fetchV2(url, ...rest);
 }
 function absUrl(path) {
     if (!path || /^https?:\/\//i.test(path)) return path;

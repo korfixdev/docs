@@ -217,16 +217,20 @@ const resp = await appFetch('/db/custom_dbtables/add?edit&ajax=1', {
 ### Чтение списка
 
 ```js
-const resp = await App.fetch('/db/projects.json');
-// resp.data — массив элементов
-// resp.total — общее количество
+const resp = await App.fetchV2('/db/projects.json');
+const items = resp.data ?? [];   // всегда массив — одинаковая форма из iframe и из корневого окна
+const total = resp.total;        // общее количество
 
 // С фильтром
-const resp = await App.fetch('/db/projects.json?form[status]=active');
+const resp = await App.fetchV2('/db/projects.json?form[status]=active');
 
-// Все страницы сразу
+// Все страницы сразу (fetchAll сохраняет легаси-форму — нормализуй через asArray, см. ниже)
 const all = await App.fetchAll('/db/projects.json');
 ```
+
+> `fetchV2()` рекомендуется для нового кода: единообразная форма `{ok, status, data, error?, total?}` из любого контекста.
+> Примеры с обычным `fetch()`/`fetchAll()` ниже по-прежнему работают, но требуют нормализации через `asArray`
+> (см. подраздел «Нормализация ответа»).
 
 > **`.json` vs `/api/db/` — фильтры и сессионный кеш.**
 >
@@ -279,22 +283,30 @@ const all = await App.fetchAll('/db/projects.json');
 > const resp = await App.fetch('/api/db/dashboards?limit=999');
 > ```
 
-**Важно: нормализация ответа.** `resp.data` не всегда массив — может быть
-объектом (единичная запись), `null`, или вложенным `resp.data.data`
-(при проксировании через `App.fetch`). **Всегда** приводите к массиву:
+**Нормализация ответа — используй `App.fetchV2()`.** Он возвращает одинаковую форму
+`{ok, status, data, error?, total?}` и из iframe, и из корневого окна, поэтому `resp.data` —
+всегда полезная нагрузка, без двойной распаковки:
 
 ```js
-// Безопасное извлечение массива данных
-function asArray(resp) {
-    if (Array.isArray(resp?.data)) return resp.data;
-    if (Array.isArray(resp?.data?.data)) return resp.data.data;
-    return [];
-}
-
-const projects = asArray(await App.fetchAll('/db/tt_projects.json'));
-const tasks    = asArray(await App.fetchAll('/db/tt_tasks.json'));
-// Теперь .sort(), .filter(), .map() безопасны
+const resp = await App.fetchV2('/db/tt_projects.json');
+const projects = resp.data ?? [];
+// resp.ok — false при ошибке, resp.error.message — причина
 ```
+
+> **Легаси-обходной путь для `App.fetch()`.** Со старым `App.fetch()` `resp.data` — это полезная
+> нагрузка в корневом окне, но `resp.data.data` внутри iframe (обёртка postMessage). Если приходится
+> использовать `fetch()`, нормализуй через `asArray`:
+>
+> ```js
+> function asArray(resp) {
+>     if (Array.isArray(resp?.data)) return resp.data;
+>     if (Array.isArray(resp?.data?.data)) return resp.data.data;
+>     return [];
+> }
+> const tasks = asArray(await App.fetchAll('/db/tt_tasks.json'));
+> ```
+>
+> В новом коде предпочитай `fetchV2()` — `asArray` нужен только для легаси-формы.
 
 ### Чтение одного элемента
 

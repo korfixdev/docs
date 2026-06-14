@@ -21,7 +21,7 @@
 | `db_access_db_get` | Чтение auto-created записи прав (для последующего обновления) |
 | `db_access_db_post` | Обновление прав для ролей (`configureAccess` helper) |
 
-Если какого-то класса нет — self-provisioning упадёт с 403 на первом же запросе. Агент-разработчик должен запустить [`korfix-token-audit`](../../devkit-skills/korfix-token-audit/) перед началом работы, чтобы не споткнуться об это посреди процесса.
+Если какого-то класса нет — self-provisioning упадёт с 403 на первом же запросе. Агент-разработчик должен запустить скилл `korfix-token-audit` перед началом работы, чтобы не споткнуться об это посреди процесса.
 
 ---
 
@@ -45,8 +45,12 @@ const CATALOG = 'custom_quicknotes';
 async function checkCatalogExists() {
     try {
         // dbname = имя таблицы без префикса custom_ (quicknotes, не custom_quicknotes)
-        const resp = await App.fetch('/db/custom_dbtables.json?form[dbname]=quicknotes');
-        return !!(resp && resp.data && Array.isArray(resp.data) && resp.data.length > 0);
+        // fetchV2: resp.data — массив и в iframe, и в корневом окне. Со старым
+        // App.fetch() внутри iframe resp.data — это объект-обёртка → Array.isArray
+        // ложно даёт false → проверка ошибочно решает «не существует» и заново
+        // создаёт каталог при каждой загрузке.
+        const resp = await App.fetchV2('/db/custom_dbtables.json?form[dbname]=quicknotes');
+        return Array.isArray(resp.data) && resp.data.length > 0;
     } catch (e) {}
     return false;
 }
@@ -58,8 +62,9 @@ async function checkCatalogExists() {
 async function checkCatalogExists(catalogName) {
     try {
         const tablename = catalogName.replace('custom_', '');
-        const resp = await App.fetch('/db/custom_dbtables.json?form[dbname]=' + tablename);
-        return !!(resp && resp.data && Array.isArray(resp.data) && resp.data.length > 0);
+        // fetchV2 → resp.data — массив в любом контексте (см. примечание выше).
+        const resp = await App.fetchV2('/db/custom_dbtables.json?form[dbname]=' + tablename);
+        return Array.isArray(resp.data) && resp.data.length > 0;
     } catch (e) {}
     return false;
 }

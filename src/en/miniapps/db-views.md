@@ -6,6 +6,17 @@
 Combine two catalogs into a single view via MySQL VIEW + LEFT JOIN.
 The result works as a regular catalog — with filtering, API, and widgets.
 
+> **Reading data.** Single request → `App.fetchV2()` (`(await App.fetchV2(url)).data ?? []`). Paginated
+> reads use `App.fetchAll()` which has no V2 variant — normalize its legacy shape with `asArray`:
+> ```js
+> function asArray(resp) {
+>     if (Array.isArray(resp?.data)) return resp.data;
+>     if (Array.isArray(resp?.data?.data)) return resp.data.data;
+>     return [];
+> }
+> ```
+> The `asArray(await App.fetchAll(...))` snippets below assume this helper is defined.
+
 ---
 
 ## When to Use
