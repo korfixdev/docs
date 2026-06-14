@@ -138,7 +138,24 @@ Uploading an app = creating/updating a record in the `/db/marketplace` catalog.
 3. Upload the zip file in the `doc1` field
 4. Save
 
-#### Via API (recommended for vibe-coding)
+#### Via API — endpoint decision table (canonical)
+
+This is the **single source of truth** for which deploy endpoint to call. Everything else
+(agents, skills) points here.
+
+| Goal | Endpoint (POST) | Notes |
+|------|-----------------|-------|
+| **Create** new app (no ID yet) | `/api/db/marketplace` (alias `/api/db/marketplace/add`) + `-F name=...` | Returns `{"id","alias"}`. `deploy/` **cannot** create. |
+| **Update** existing app (default) | `/api/db/marketplace/{ID}` | Standard. Uploads the zip + notifies the store via internal hook. Sufficient in production. |
+| **Update + force `appconfig` refresh** | `/api/marketplace/deploy/{ID}` | Alias = update + refresh in one call. Requires an existing ID. Use when you must explicitly clear the config cache. |
+| **Cache-only** invalidation | `/api/marketplace/refresh/{ID}` | When the zip is already uploaded and only the cache is stale. |
+
+Both update endpoints (`/api/db/marketplace/{ID}` and `/api/marketplace/deploy/{ID}`) run the same
+deploy-time manifest validation (errors → `422` block, warnings → success). Auth on all of them:
+`Authorization: Bearer {TOKEN}` header **or** `?token={TOKEN}` query.
+
+> **Default to `/api/db/marketplace/{ID}` for updates.** Reach for `/api/marketplace/deploy/{ID}`
+> only when you specifically need the cache refresh in one shot.
 
 **Creating a new app** (no ID yet):
 

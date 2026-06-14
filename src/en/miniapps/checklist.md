@@ -9,9 +9,10 @@ Check all items before publishing the app to the marketplace.
 
 ## config.json
 
-- [ ] Valid JSON
+- [ ] Valid JSON — the manifest is validated server-side on deploy (config.json + archive). Fix whatever the deploy response reports: `errors` block the deploy (`{"status":"error","message":"..."}`), `warnings` (`"warnings":[...]`) succeed but should still be addressed. Pre-flight locally before zipping: `python3 -m json.tool config.json` / `jq . config.json`
 - [ ] `name` field — app name
-- [ ] `package` field — package name (app folder name)
+- [ ] `package` field — package name (app folder name) — recommended; missing → deploy warning
+- [ ] `category` field — integer id `1..5` (`1` AI-agents, `2` Business, `3` Games, `4` Tools, `5` Other). The platform writes it to the DB on first install if still empty
 - [ ] `description` field — short description (1-2 sentences)
 - [ ] `about` field — detailed description with all sections (What it does, Where it appears, Features, How to use, Setup)
 - [ ] In `about` — direct links to CRM sections where the app appears (e.g. `/db/tt_tasks`, `/db/ag_cashflows`)
