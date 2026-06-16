@@ -105,6 +105,10 @@ plugins:
             Release: Релиз
             Deploy: Деплой
             Checklist: Чеклист
+            Messenger Apps: Приложения в мессенджере
+            Build your first app: Первое приложение
+            SDK & auth: SDK и авторизация
+            Adapt a Telegram app: Адаптация Telegram-приложения
             Gamedev: Геймдев
             Game concepts: Концепции игр
             Game config: Конфиг игры
@@ -183,6 +187,11 @@ nav:
     - Game styling: gamedev/styling.md
     - Game checklist: gamedev/checklist.md
     - Project structure: gamedev/project-structure.md
+  - Messenger Apps:
+    - Overview: messenger-apps/index.md
+    - Build your first app: messenger-apps/getting-started.md
+    - SDK & auth: messenger-apps/sdk.md
+    - Adapt a Telegram app: messenger-apps/telegram-compat.md
 
 extra:
   alternate:
